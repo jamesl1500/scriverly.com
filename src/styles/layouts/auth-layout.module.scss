@@ -1,0 +1,182 @@
+@use '../variables' as v;
+@use '../animations' as animations;
+
+// ===== Auth Layout Shell =====
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: v.$space-6 v.$space-4;
+  background-color: v.$color-bg-page;
+  // Subtle radial warmth, very faint, like claude.ai
+  background-image: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    rgba(200, 133, 74, 0.055) 0%,
+    transparent 70%
+  );
+}
+
+// ===== Auth Card =====
+
+.card {
+  width: 100%;
+  max-width: v.$auth-card-max-width;
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-2xl;
+  box-shadow: v.$shadow-card;
+  padding: v.$space-10 v.$space-10 v.$space-12;
+  animation: fade-in-up 0.35s v.$ease-default both;
+
+  @media (max-width: 480px) {
+    padding: v.$space-8 v.$space-6 v.$space-10;
+    border-radius: v.$radius-xl;
+  }
+}
+
+// ===== Card Header =====
+
+.logoWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: v.$space-8;
+}
+
+.heading {
+  font-size: v.$font-size-2xl;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tight;
+  line-height: v.$line-height-tight;
+  text-align: center;
+  margin-bottom: v.$space-2;
+}
+
+.subheading {
+  font-size: v.$font-size-base;
+  color: v.$color-text-secondary;
+  text-align: center;
+  line-height: v.$line-height-relaxed;
+  margin-bottom: v.$space-8;
+}
+
+// ===== Form =====
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-5;
+}
+
+.submitBtn {
+  margin-top: v.$space-2;
+}
+
+// ===== Footer link line =====
+
+.footer {
+  margin-top: v.$space-6;
+  text-align: center;
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+
+  a {
+    color: v.$color-text-accent;
+    font-weight: v.$font-weight-medium;
+    text-decoration: none;
+
+    &:hover {
+      color: v.$color-accent-dark;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+}
+
+// ===== Alert banner (server-side error/success) =====
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: v.$space-2;
+  padding: v.$space-3 v.$space-4;
+  border-radius: v.$radius-lg;
+  font-size: v.$font-size-sm;
+  line-height: v.$line-height-snug;
+  animation: fade-in-down 0.2s v.$ease-default both;
+
+  svg { flex-shrink: 0; margin-top: 1px; }
+
+  &.alertError {
+    background-color: v.$color-error-bg;
+    color: v.$color-error;
+    border: 1px solid v.$color-error-border;
+  }
+
+  &.alertSuccess {
+    background-color: v.$color-success-bg;
+    color: v.$color-success;
+    border: 1px solid v.$color-success-border;
+  }
+}
+
+// ===== Password hint meter =====
+
+.passwordHint {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  line-height: v.$line-height-snug;
+  margin-top: -(v.$space-2);
+}
+
+// ===== Divider =====
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  color: v.$color-text-muted;
+  font-size: v.$font-size-xs;
+  letter-spacing: v.$tracking-wider;
+  text-transform: uppercase;
+  margin-block: v.$space-2;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: v.$color-border;
+  }
+}
+
+// ===== Verify Email icon area =====
+
+.iconCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  background-color: v.$color-accent-light;
+  border-radius: v.$radius-full;
+  color: v.$color-accent;
+  margin: 0 auto v.$space-6;
+  animation: fade-in 0.4s v.$ease-default both;
+}
+
+.emailAddress {
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+}
+
+.resendRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: v.$space-3;
+  margin-top: v.$space-6;
+}

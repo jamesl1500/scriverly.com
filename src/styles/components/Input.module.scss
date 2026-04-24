@@ -1,0 +1,93 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+
+.wrapper {
+  @include m.input-shell;
+  position: relative;
+
+  &.hasLeft .input {
+    padding-left: v.$space-10;
+  }
+
+  &.hasRight .input {
+    padding-right: v.$space-10;
+  }
+
+  &.error {
+    border-color: v.$color-border-error;
+
+    &:focus-within {
+      border-color: v.$color-error;
+      box-shadow: 0 0 0 3px rgba(v.$color-error, 0.14);
+    }
+
+    &:hover:not(:focus-within) {
+      border-color: v.$color-error;
+    }
+  }
+
+  &:has(input:disabled) {
+    background-color: v.$color-bg-subtle;
+    border-color: v.$color-border;
+    cursor: not-allowed;
+  }
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: v.$input-height-md;
+  padding-inline: v.$space-3;
+  border: none;
+  background: transparent;
+  color: v.$color-text-primary;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-base;
+  line-height: v.$line-height-normal;
+  outline: none;
+  appearance: none;
+
+  &::placeholder {
+    color: v.$color-text-placeholder;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    color: v.$color-text-muted;
+  }
+
+  // Hide browser password reveal button
+  &::-ms-reveal,
+  &::-ms-clear {
+    display: none;
+  }
+}
+
+.iconLeft,
+.iconRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: v.$color-text-muted;
+  line-height: 0;
+  transition: color v.$transition-fast;
+}
+
+.iconLeft {
+  left: v.$space-3;
+  pointer-events: none;
+}
+
+.iconRight {
+  right: v.$space-3;
+  // Allow interactive right icons (e.g. password toggle)
+}
+
+.wrapper:focus-within .iconLeft,
+.wrapper:focus-within .iconRight {
+  color: v.$color-text-secondary;
+}

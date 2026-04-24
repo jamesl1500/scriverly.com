@@ -1,0 +1,46 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+@use '../animations' as animations;
+
+.field {
+  @include m.flex-col;
+  gap: v.$space-2;
+}
+
+.labelRow {
+  @include m.flex-between;
+}
+
+.label {
+  @include m.label-base;
+  cursor: default;
+
+  .required {
+    color: v.$color-error;
+    margin-left: v.$space-1;
+    font-size: v.$font-size-xs;
+  }
+}
+
+.hint {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  line-height: v.$line-height-snug;
+  margin-top: v.$space-1;
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: v.$space-1;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-error;
+  line-height: v.$line-height-snug;
+  animation: fade-in-down v.$transition-base both;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 0.05em;
+  }
+}

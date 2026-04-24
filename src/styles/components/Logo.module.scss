@@ -1,0 +1,59 @@
+@use '../variables' as v;
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  text-decoration: none;
+  user-select: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  background-color: v.$color-accent;
+  border-radius: v.$radius-lg;
+  color: v.$color-text-inverse;
+
+  .lg & {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: v.$radius-xl;
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+.wordmark {
+  font-family: v.$font-sans;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tight;
+  line-height: v.$line-height-none;
+
+  .md & {
+    font-size: v.$font-size-lg;
+  }
+
+  .lg & {
+    font-size: v.$font-size-xl;
+  }
+
+  .sm & {
+    font-size: v.$font-size-base;
+  }
+}
+
+// Size modifier classes (on .logo root)
+.sm  .icon { width: 1.5rem; height: 1.5rem; border-radius: v.$radius-md; }
+.lg  .icon { width: 2.5rem; height: 2.5rem; border-radius: v.$radius-xl; }
