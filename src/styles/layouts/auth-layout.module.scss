@@ -26,7 +26,7 @@
   max-width: v.$auth-card-max-width;
   background-color: v.$color-bg-card;
   border: 1px solid v.$color-border;
-  border-radius: v.$radius-2xl;
+  border-radius: v.$radius-xs;
   box-shadow: v.$shadow-card;
   padding: v.$space-10 v.$space-10 v.$space-12;
   animation: fade-in-up 0.35s v.$ease-default both;
@@ -107,6 +107,7 @@
   font-size: v.$font-size-sm;
   line-height: v.$line-height-snug;
   animation: fade-in-down 0.2s v.$ease-default both;
+  margin-bottom: 10px;
 
   svg { flex-shrink: 0; margin-top: 1px; }
 
