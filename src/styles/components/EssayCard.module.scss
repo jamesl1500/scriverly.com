@@ -1,0 +1,217 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+@use '../animations' as animations;
+
+// ===== Essay Card =====
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+  padding: v.$space-5;
+  transition:
+    border-color v.$transition-base,
+    box-shadow v.$transition-base,
+    transform v.$transition-slow;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    border-color: v.$color-border-strong;
+    box-shadow: v.$shadow-card;
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+// ===== Card Header =====
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: v.$space-3;
+  margin-bottom: v.$space-3;
+}
+
+.cardBadges {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-1;
+  padding: 2px v.$space-2;
+  border-radius: v.$radius-full;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-medium;
+  letter-spacing: v.$tracking-wide;
+  white-space: nowrap;
+
+  // Status variants
+  &.statusDraft {
+    background-color: v.$color-bg-subtle;
+    color: v.$color-text-secondary;
+  }
+
+  &.statusInProgress {
+    background-color: v.$color-accent-light;
+    color: v.$color-accent-dark;
+  }
+
+  &.statusComplete {
+    background-color: v.$color-success-bg;
+    color: v.$color-success;
+  }
+
+  // Type badge
+  &.typeBadge {
+    background-color: v.$color-bg-subtle;
+    color: v.$color-text-secondary;
+    text-transform: capitalize;
+  }
+}
+
+.cardMenu {
+  display: flex;
+  align-items: center;
+  gap: v.$space-1;
+  opacity: 0;
+  transition: opacity v.$transition-fast;
+
+  .card:hover & {
+    opacity: 1;
+  }
+}
+
+.cardMenuBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: v.$radius-md;
+  background: none;
+  border: none;
+  color: v.$color-text-muted;
+  cursor: pointer;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+  font-family: v.$font-sans;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  &:hover.cardMenuBtnDestructive {
+    background-color: v.$color-error-bg;
+    color: v.$color-error;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+// ===== Card Body =====
+
+.cardTitle {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  line-height: v.$line-height-snug;
+  letter-spacing: v.$tracking-tight;
+  margin-bottom: v.$space-2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardTopic {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  @include m.truncate;
+  margin-bottom: v.$space-4;
+}
+
+// ===== Word Count Progress =====
+
+.progressWrap {
+  margin-bottom: v.$space-3;
+}
+
+.progressRow {
+  @include m.flex-between;
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  margin-bottom: v.$space-1;
+
+  span:last-child {
+    font-weight: v.$font-weight-medium;
+    color: v.$color-text-secondary;
+  }
+}
+
+.progressTrack {
+  height: 4px;
+  background-color: v.$color-bg-subtle;
+  border-radius: v.$radius-full;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: v.$color-accent;
+  border-radius: v.$radius-full;
+  transition: width v.$transition-slow;
+
+  &.progressComplete {
+    background-color: v.$color-success;
+  }
+}
+
+// ===== Card Footer =====
+
+.cardFooter {
+  @include m.flex-between;
+  gap: v.$space-3;
+  margin-top: auto;
+  padding-top: v.$space-4;
+  border-top: 1px solid v.$color-border;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  flex-wrap: wrap;
+}
+
+.cardMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-1;
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+}
+
+.dueOverdue {
+  color: v.$color-error;
+  font-weight: v.$font-weight-medium;
+}
+
+.dueSoon {
+  color: v.$color-warning;
+  font-weight: v.$font-weight-medium;
+}

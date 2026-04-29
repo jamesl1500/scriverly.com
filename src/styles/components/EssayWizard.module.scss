@@ -1,0 +1,374 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+@use '../animations' as animations;
+
+// ===== Wizard Page Wrapper =====
+
+.page {
+  min-height: calc(100dvh - 3.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: v.$space-8 v.$space-6;
+  background-color: v.$color-bg-page;
+}
+
+// ===== Wizard Card =====
+
+.card {
+  width: 100%;
+  max-width: 580px;
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-xl;
+  box-shadow: v.$shadow-card;
+  overflow: hidden;
+  animation: fade-in-up 0.35s v.$ease-default both;
+}
+
+// ===== Step Indicator =====
+
+.stepIndicator {
+  display: flex;
+  align-items: center;
+  padding: v.$space-6 v.$space-6 0;
+  margin-bottom: v.$space-6;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  flex: 1;
+  min-width: 0;
+}
+
+.stepCircle {
+  width: 2rem;
+  height: 2rem;
+  border-radius: v.$radius-full;
+  @include m.flex-center;
+  flex-shrink: 0;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  transition: background-color v.$transition-base, color v.$transition-base, border-color v.$transition-base;
+
+  // Inactive
+  background-color: v.$color-bg-subtle;
+  color: v.$color-text-muted;
+  border: 2px solid v.$color-border;
+
+  &.stepActive {
+    background-color: v.$color-accent;
+    color: v.$color-text-inverse;
+    border-color: v.$color-accent;
+    box-shadow: 0 0 0 4px rgba(v.$color-accent, 0.15);
+  }
+
+  &.stepDone {
+    background-color: v.$color-success;
+    color: v.$color-text-inverse;
+    border-color: v.$color-success;
+  }
+}
+
+.stepLabel {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-muted;
+  @include m.truncate;
+  display: none;
+
+  @media (min-width: v.$bp-sm) {
+    display: block;
+  }
+
+  .stepItemActive & {
+    color: v.$color-text-primary;
+  }
+
+  .stepItemDone & {
+    color: v.$color-text-secondary;
+  }
+}
+
+.stepConnector {
+  flex: 1;
+  height: 2px;
+  background-color: v.$color-border;
+  margin: 0 v.$space-2;
+  border-radius: v.$radius-full;
+  transition: background-color v.$transition-base;
+
+  &.stepConnectorDone {
+    background-color: v.$color-success;
+  }
+
+  @media (min-width: v.$bp-sm) {
+    margin: 0 v.$space-3;
+  }
+}
+
+// ===== Step Header =====
+
+.stepHeader {
+  padding: 0 v.$space-6;
+  margin-bottom: v.$space-6;
+}
+
+.stepTitle {
+  font-size: v.$font-size-xl;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tight;
+  line-height: v.$line-height-tight;
+  margin-bottom: v.$space-2;
+}
+
+.stepDesc {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  line-height: v.$line-height-relaxed;
+}
+
+// ===== Step Body =====
+
+.stepBody {
+  padding: 0 v.$space-6;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-5;
+
+  // Step animations
+  animation: fade-in-up 0.25s v.$ease-default both;
+}
+
+// ===== Form Fields =====
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-5;
+
+  @media (min-width: v.$bp-sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.spanFull {
+  grid-column: 1 / -1;
+}
+
+// ===== Textarea =====
+
+.textarea {
+  width: 100%;
+  padding: v.$space-3;
+  background-color: v.$color-bg-card;
+  border: 1.5px solid v.$color-border;
+  border-radius: v.$radius-md;
+  color: v.$color-text-primary;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-base;
+  line-height: v.$line-height-relaxed;
+  resize: vertical;
+  min-height: 96px;
+  outline: none;
+  transition: border-color v.$transition-base, box-shadow v.$transition-base;
+
+  &::placeholder {
+    color: v.$color-text-placeholder;
+  }
+
+  &:hover:not(:focus) {
+    border-color: v.$color-border-strong;
+  }
+
+  &:focus {
+    border-color: v.$color-border-focus;
+    box-shadow: 0 0 0 3px rgba(v.$color-accent, 0.14);
+  }
+
+  &.textareaError {
+    border-color: v.$color-border-error;
+
+    &:focus {
+      border-color: v.$color-error;
+      box-shadow: 0 0 0 3px rgba(v.$color-error, 0.14);
+    }
+  }
+}
+
+// ===== Select =====
+
+.selectWrap {
+  @include m.input-shell;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: v.$space-3;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid v.$color-text-muted;
+    pointer-events: none;
+  }
+}
+
+.select {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: v.$input-height-md;
+  padding-inline: v.$space-3;
+  padding-right: v.$space-10;
+  border: none;
+  background: transparent;
+  color: v.$color-text-primary;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-base;
+  line-height: v.$line-height-normal;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+// ===== Number input =====
+
+.numberInput {
+  @include m.input-shell;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    height: v.$input-height-md;
+    padding-inline: v.$space-3;
+    border: none;
+    background: transparent;
+    color: v.$color-text-primary;
+    font-family: v.$font-sans;
+    font-size: v.$font-size-base;
+    outline: none;
+
+    &::placeholder {
+      color: v.$color-text-placeholder;
+    }
+
+    // Hide native number spinners
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      appearance: none;
+      margin: 0;
+    }
+    -moz-appearance: textfield;
+  }
+
+  .inputUnit {
+    padding-right: v.$space-3;
+    font-size: v.$font-size-sm;
+    color: v.$color-text-muted;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+// ===== Toggle / Checkbox =====
+
+.toggleRow {
+  @include m.flex-between;
+  gap: v.$space-4;
+  padding: v.$space-4;
+  background-color: v.$color-bg-subtle;
+  border: 1.5px solid v.$color-border;
+  border-radius: v.$radius-md;
+  cursor: pointer;
+  transition: background-color v.$transition-fast, border-color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    border-color: v.$color-border-strong;
+  }
+
+  &.toggleRowActive {
+    background-color: v.$color-accent-lighter;
+    border-color: v.$color-accent;
+  }
+}
+
+.toggleLabel {
+  @include m.flex-col;
+  gap: 2px;
+}
+
+.toggleTitle {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+}
+
+.toggleHint {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  line-height: v.$line-height-relaxed;
+}
+
+.toggleSwitchTrack {
+  position: relative;
+  width: 2.5rem;
+  height: 1.375rem;
+  background-color: v.$color-bg-subtle;
+  border: 1.5px solid v.$color-border;
+  border-radius: v.$radius-full;
+  flex-shrink: 0;
+  transition: background-color v.$transition-base, border-color v.$transition-base;
+  cursor: pointer;
+
+  .toggleRowActive & {
+    background-color: v.$color-accent;
+    border-color: v.$color-accent;
+  }
+}
+
+.toggleSwitchThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1rem;
+  height: 1rem;
+  background-color: v.$color-text-muted;
+  border-radius: v.$radius-full;
+  transition: transform v.$transition-base, background-color v.$transition-base;
+
+  .toggleRowActive & {
+    transform: translateX(1.125rem);
+    background-color: v.$color-text-inverse;
+  }
+}
+
+// ===== Navigation Footer =====
+
+.wizardFooter {
+  @include m.flex-between;
+  gap: v.$space-4;
+  padding: v.$space-6;
+  margin-top: v.$space-6;
+  border-top: 1px solid v.$color-border;
+}
+
+.wizardFooterRight {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+}
+
+.stepCounter {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+}

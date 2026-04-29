@@ -1,0 +1,376 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+@use '../animations' as animations;
+
+// ===== Settings Page =====
+
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: v.$space-8 v.$space-6;
+
+  @media (min-width: v.$bp-lg) {
+    padding: v.$space-10 v.$space-10;
+  }
+}
+
+// ===== Page Header =====
+
+.pageHeader {
+  margin-bottom: v.$space-8;
+}
+
+.pageHeading {
+  font-size: v.$font-size-2xl;
+  font-weight: v.$font-weight-semibold;
+  letter-spacing: v.$tracking-tight;
+  color: v.$color-text-primary;
+  line-height: v.$line-height-tight;
+}
+
+.pageSubheading {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  margin-top: v.$space-1;
+}
+
+// ===== Settings Grid (tab nav + content) =====
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-6;
+  align-items: start;
+
+  @media (min-width: v.$bp-md) {
+    grid-template-columns: 192px 1fr;
+    gap: v.$space-8;
+  }
+}
+
+// ===== Tab Nav =====
+
+.tabNav {
+  display: flex;
+  flex-direction: row;
+  gap: v.$space-1;
+  overflow-x: auto;
+
+  @media (min-width: v.$bp-md) {
+    flex-direction: column;
+    position: sticky;
+    top: calc(3.5rem + v.$space-6);
+    background-color: v.$color-bg-card;
+    border: 1px solid v.$color-border;
+    border-radius: v.$radius-lg;
+    padding: v.$space-2;
+    overflow-x: visible;
+  }
+
+  animation: fade-in-up 0.3s v.$ease-default both;
+}
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-2 v.$space-3;
+  border-radius: v.$radius-md;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-secondary;
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: left;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+  font-family: v.$font-sans;
+  width: 100%;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+.tabBtnActive {
+  background-color: v.$color-accent-light;
+  color: v.$color-accent-dark;
+
+  &:hover {
+    background-color: v.$color-accent-light;
+    color: v.$color-accent-dark;
+  }
+}
+
+.tabBtnDanger {
+  color: v.$color-error;
+
+  &:hover {
+    background-color: v.$color-error-bg;
+    color: v.$color-error;
+  }
+
+  &.tabBtnActive {
+    background-color: v.$color-error-bg;
+    color: v.$color-error;
+  }
+}
+
+// ===== Tab Content =====
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-4;
+  animation: fade-in-up 0.25s v.$ease-default both;
+}
+
+// ===== Content Sections =====
+
+.section {
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+  overflow: hidden;
+}
+
+.sectionHead {
+  padding: v.$space-5 v.$space-6;
+  border-bottom: 1px solid v.$color-border;
+}
+
+.sectionTitle {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  margin-bottom: v.$space-1;
+}
+
+.sectionDesc {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  line-height: v.$line-height-relaxed;
+}
+
+.sectionBody {
+  padding: v.$space-6;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-5;
+}
+
+// ===== Preferences form grid =====
+
+.prefGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-5;
+
+  @media (min-width: v.$bp-sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+// ===== Account field rows =====
+
+.fieldRow {
+  @include m.flex-between;
+  gap: v.$space-4;
+  padding: v.$space-4 v.$space-6;
+  border-bottom: 1px solid v.$color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.fieldInfo {
+  @include m.flex-col;
+  gap: v.$space-1;
+  min-width: 0;
+}
+
+.fieldLabel {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-primary;
+}
+
+.fieldMeta {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  @include m.truncate;
+}
+
+.fieldBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-1;
+  padding: 1px v.$space-2;
+  border-radius: v.$radius-full;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-medium;
+
+  &.badgeVerified {
+    background-color: v.$color-success-bg;
+    color: v.$color-success;
+    border: 1px solid v.$color-success-border;
+  }
+
+  &.badgeUnverified {
+    background-color: v.$color-warning-bg;
+    color: v.$color-warning;
+  }
+}
+
+.fieldActions {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  flex-shrink: 0;
+}
+
+// ===== Select (reused from Profile) =====
+
+.selectWrap {
+  @include m.input-shell;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: v.$space-3;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid v.$color-text-muted;
+    pointer-events: none;
+  }
+}
+
+.select {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: v.$input-height-md;
+  padding-inline: v.$space-3;
+  padding-right: v.$space-10;
+  border: none;
+  background: transparent;
+  color: v.$color-text-primary;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-base;
+  line-height: v.$line-height-normal;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+// ===== Form actions =====
+
+.formActions {
+  display: flex;
+  align-items: center;
+  gap: v.$space-4;
+  padding: v.$space-5 v.$space-6;
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+}
+
+// ===== Danger Zone =====
+
+.dangerSection {
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-error-border;
+  border-radius: v.$radius-lg;
+  overflow: hidden;
+}
+
+.dangerHead {
+  padding: v.$space-5 v.$space-6;
+  border-bottom: 1px solid v.$color-error-border;
+  background-color: v.$color-error-bg;
+}
+
+.dangerTitle {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-error;
+  margin-bottom: v.$space-1;
+}
+
+.dangerDesc {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+}
+
+.dangerBody {
+  padding: v.$space-6;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-5;
+}
+
+.dangerRow {
+  @include m.flex-between;
+  gap: v.$space-6;
+  padding: v.$space-5;
+  background-color: v.$color-bg-page;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-md;
+}
+
+.dangerRowInfo {
+  @include m.flex-col;
+  gap: v.$space-1;
+}
+
+.dangerRowLabel {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+}
+
+.dangerRowDesc {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  line-height: v.$line-height-relaxed;
+}
+
+// ===== Alert =====
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: v.$space-2;
+  padding: v.$space-3 v.$space-4;
+  border-radius: v.$radius-lg;
+  font-size: v.$font-size-sm;
+  line-height: v.$line-height-snug;
+  animation: fade-in-down 0.2s v.$ease-default both;
+
+  svg { flex-shrink: 0; margin-top: 1px; }
+
+  &.alertSuccess {
+    background-color: v.$color-success-bg;
+    color: v.$color-success;
+    border: 1px solid v.$color-success-border;
+  }
+
+  &.alertError {
+    background-color: v.$color-error-bg;
+    color: v.$color-error;
+    border: 1px solid v.$color-error-border;
+  }
+}

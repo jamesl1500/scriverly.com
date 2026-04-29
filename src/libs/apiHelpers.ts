@@ -1,6 +1,21 @@
+/**
+ * apiHelpers.ts
+ * -----------------
+ * This file contains helper functions for handling API responses and errors in a consistent way across the application.
+ * 
+ * @module src/libs/apiHelpers
+ * @author James Latten
+ * @created 2026-04-29
+ * @version 1.0.0
+ */
 import { NextResponse } from 'next/server';
 import { AuthError } from '@supabase/supabase-js';
 
+/**
+ * Type definitions for API responses:
+ * - ApiSuccessResponse: Represents a successful API response, containing a `success` flag set to true and a `data` field of a generic type T.
+ * - ApiErrorResponse: Represents an error response from the API, containing a `success` flag set to false, an `error` message, and an optional `code` for more specific error identification.
+ */
 export interface ApiSuccessResponse<T = unknown> {
   success: true;
   data: T;
@@ -12,6 +27,14 @@ export interface ApiErrorResponse {
   code?: string;
 }
 
+/**
+ * successResponse:
+ * Helper function to create a standardized JSON response for successful API calls. It takes the data to be returned and an optional HTTP status code (defaulting to 200) and returns a NextResponse object with the appropriate structure.
+ * 
+ * @param data The data to be returned in the response.
+ * @param status The HTTP status code for the response. Defaults to 200.
+ * @returns A NextResponse object containing the standardized success response.
+ */
 export function successResponse<T>(data: T, status = 200) {
   return NextResponse.json<ApiSuccessResponse<T>>(
     { success: true, data },
@@ -19,6 +42,15 @@ export function successResponse<T>(data: T, status = 200) {
   );
 }
 
+/**
+ * errorResponse:
+ * Helper function to create a standardized JSON response for API errors. It takes an error message, an HTTP status code, and an optional error code, and returns a NextResponse object with the appropriate structure.
+ * 
+ * @param message The error message to be returned in the response.
+ * @param status The HTTP status code for the response.
+ * @param code An optional error code for more specific error identification.
+ * @returns A NextResponse object containing the standardized error response.
+ */
 export function errorResponse(message: string, status: number, code?: string) {
   return NextResponse.json<ApiErrorResponse>(
     { success: false, error: message, ...(code ? { code } : {}) },

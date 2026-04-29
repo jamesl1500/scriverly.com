@@ -65,123 +65,125 @@ export default function AppNav({ user }: AppNavProps) {
   return (
     <>
       <nav className={styles.nav}>
-        {/* Left: Logo */}
-        <div className={styles.navLeft}>
-          <Logo size="md" />
-        </div>
-
-        {/* Center: Nav links */}
-        <div className={styles.navLinks}>
-          {NAV_LINKS.map(({ href, label, icon: Icon }) => {
-            const isActive = pathname === href || pathname.startsWith(href + '/');
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={[
-                  styles.navLink,
-                  isActive ? styles.navLinkActive : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                <Icon size={15} aria-hidden="true" />
-                {label}
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Right: New Essay + User */}
-        <div className={styles.navRight}>
-          <Link href="/essays/new" className={styles.newEssayBtn}>
-            <Plus size={15} aria-hidden="true" />
-            New essay
-          </Link>
-
-          {/* User dropdown */}
-          <div
-            className={[styles.userMenu, menuOpen ? styles.userMenuOpen : '']
-              .filter(Boolean)
-              .join(' ')}
-            ref={menuRef}
-          >
-            <button
-              type="button"
-              className={styles.userButton}
-              onClick={() => setMenuOpen((o) => !o)}
-              aria-expanded={menuOpen}
-              aria-haspopup="menu"
-              aria-label="Account menu"
-            >
-              {user.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.avatarUrl}
-                  alt={user.fullName}
-                  className={styles.userAvatar}
-                />
-              ) : (
-                <span className={styles.userAvatarInitials} aria-hidden="true">
-                  {initials}
-                </span>
-              )}
-              <span className={styles.userName}>{user.fullName}</span>
-              <ChevronDown size={14} className={styles.chevron} aria-hidden="true" />
-            </button>
-
-            {menuOpen && (
-              <div className={styles.dropdown} role="menu">
-                <Link
-                  href="/profile"
-                  className={styles.dropdownItem}
-                  role="menuitem"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <UserCircle size={15} aria-hidden="true" />
-                  Profile
-                </Link>
-                <Link
-                  href="/settings"
-                  className={styles.dropdownItem}
-                  role="menuitem"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <Settings size={15} aria-hidden="true" />
-                  Settings
-                </Link>
-                <div className={styles.dropdownDivider} role="separator" />
-                <form action="/api/auth/logout" method="POST">
-                  <button
-                    type="submit"
-                    className={[
-                      styles.dropdownItem,
-                      styles.dropdownItemDestructive,
-                    ].join(' ')}
-                    role="menuitem"
-                  >
-                    <LogOut size={15} aria-hidden="true" />
-                    Sign out
-                  </button>
-                </form>
-              </div>
-            )}
+        <div className={styles.navContainer}>
+          {/* Left: Logo */}
+          <div className={styles.navLeft}>
+            <Logo size="md" />
           </div>
 
-          {/* Mobile menu toggle */}
-          <button
-            type="button"
-            className={styles.mobileMenuButton}
-            onClick={() => setMobileOpen((o) => !o)}
-            aria-expanded={mobileOpen}
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-          >
-            {mobileOpen ? (
-              <X size={18} aria-hidden="true" />
-            ) : (
-              <Menu size={18} aria-hidden="true" />
-            )}
-          </button>
+          {/* Center: Nav links */}
+          <div className={styles.navLinks}>
+            {NAV_LINKS.map(({ href, label, icon: Icon }) => {
+              const isActive = pathname === href || pathname.startsWith(href + '/');
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={[
+                    styles.navLink,
+                    isActive ? styles.navLinkActive : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <Icon size={15} aria-hidden="true" />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Right: New Essay + User */}
+          <div className={styles.navRight}>
+            <Link href="/essays/new" className={styles.newEssayBtn}>
+              <Plus size={15} aria-hidden="true" />
+              New essay
+            </Link>
+
+            {/* User dropdown */}
+            <div
+              className={[styles.userMenu, menuOpen ? styles.userMenuOpen : '']
+                .filter(Boolean)
+                .join(' ')}
+              ref={menuRef}
+            >
+              <button
+                type="button"
+                className={styles.userButton}
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
+                aria-label="Account menu"
+              >
+                {user.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.fullName}
+                    className={styles.userAvatar}
+                  />
+                ) : (
+                  <span className={styles.userAvatarInitials} aria-hidden="true">
+                    {initials}
+                  </span>
+                )}
+                <span className={styles.userName}>{user.fullName}</span>
+                <ChevronDown size={14} className={styles.chevron} aria-hidden="true" />
+              </button>
+
+              {menuOpen && (
+                <div className={styles.dropdown} role="menu">
+                  <Link
+                    href="/profile"
+                    className={styles.dropdownItem}
+                    role="menuitem"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <UserCircle size={15} aria-hidden="true" />
+                    Profile
+                  </Link>
+                  <Link
+                    href="/settings"
+                    className={styles.dropdownItem}
+                    role="menuitem"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <Settings size={15} aria-hidden="true" />
+                    Settings
+                  </Link>
+                  <div className={styles.dropdownDivider} role="separator" />
+                  <form action="/api/auth/logout" method="POST">
+                    <button
+                      type="submit"
+                      className={[
+                        styles.dropdownItem,
+                        styles.dropdownItemDestructive,
+                      ].join(' ')}
+                      role="menuitem"
+                    >
+                      <LogOut size={15} aria-hidden="true" />
+                      Sign out
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile menu toggle */}
+            <button
+              type="button"
+              className={styles.mobileMenuButton}
+              onClick={() => setMobileOpen((o) => !o)}
+              aria-expanded={mobileOpen}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            >
+              {mobileOpen ? (
+                <X size={18} aria-hidden="true" />
+              ) : (
+                <Menu size={18} aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
       </nav>
 

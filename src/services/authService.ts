@@ -1,3 +1,13 @@
+/**
+ * authService.ts
+ * -----------------
+ * This file contains functions for handling user authentication-related API calls, such as logging in, signing up, and password management. It uses the `apiClient` Axios instance to communicate with the backend API and provides a helper function to extract user-friendly error messages from API responses.
+ * 
+ * @module src/services/authService
+ * @author James Latten
+ * @created 2026-04-29
+ * @version 1.0.0
+ */
 import apiClient from '@/libs/apiClient';
 import type { AxiosError } from 'axios';
 import type {

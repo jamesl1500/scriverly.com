@@ -1,3 +1,13 @@
+/**
+ * onboarding.ts
+ * -----------------
+ * This file defines the validation schema for the onboarding profile form using Zod. It ensures that user input for the full name, username, and bio fields meets specific criteria before being accepted.
+ * 
+ * @module src/libs/validations/onboarding
+ * @author James Latten
+ * @created 2026-04-29
+ * @version 1.0.0
+ */
 import { z } from 'zod';
 
 export const onboardingProfileSchema = z.object({
