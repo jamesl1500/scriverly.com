@@ -1,0 +1,436 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+@use '../animations' as animations;
+
+// ===== App Shell =====
+
+.shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: v.$color-bg-page;
+}
+
+// ===== Nav =====
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: v.$z-sticky;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  padding: 0 v.$space-6;
+  background-color: v.$color-bg-card;
+  border-bottom: 1px solid v.$color-border;
+  gap: v.$space-6;
+
+  @media (min-width: v.$bp-lg) {
+    padding: 0 v.$space-10;
+  }
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.navLinks {
+  display: none;
+  align-items: center;
+  gap: v.$space-1;
+  flex: 1;
+
+  @media (min-width: v.$bp-md) {
+    display: flex;
+  }
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-2 v.$space-3;
+  border-radius: v.$radius-md;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-secondary;
+  text-decoration: none;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  &.navLinkActive {
+    background-color: v.$color-accent-light;
+    color: v.$color-accent-dark;
+  }
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  margin-left: auto;
+}
+
+// ===== User Menu =====
+
+.userMenu {
+  position: relative;
+}
+
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-1 v.$space-2;
+  border-radius: v.$radius-md;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: background-color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+.userAvatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: v.$radius-full;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.userAvatarInitials {
+  width: 2rem;
+  height: 2rem;
+  border-radius: v.$radius-full;
+  background-color: v.$color-accent;
+  color: v.$color-text-inverse;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  @include m.flex-center;
+  flex-shrink: 0;
+  user-select: none;
+  letter-spacing: v.$tracking-wide;
+}
+
+.userName {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-primary;
+  @include m.truncate;
+  max-width: 140px;
+
+  @media (max-width: #{v.$bp-sm - 1px}) {
+    display: none;
+  }
+}
+
+.chevron {
+  color: v.$color-text-muted;
+  transition: transform v.$transition-fast;
+
+  .userMenuOpen & {
+    transform: rotate(180deg);
+  }
+}
+
+// ===== User Dropdown =====
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + v.$space-2);
+  right: 0;
+  min-width: 188px;
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+  box-shadow: v.$shadow-lg;
+  padding: v.$space-1;
+  animation: fade-in-down 0.15s v.$ease-default both;
+  z-index: v.$z-dropdown;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background-color: v.$color-border;
+  margin: v.$space-1 0;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  width: 100%;
+  padding: v.$space-2 v.$space-3;
+  border-radius: v.$radius-md;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-regular;
+  color: v.$color-text-secondary;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  &.dropdownItemDestructive {
+    color: v.$color-error;
+
+    &:hover {
+      background-color: v.$color-error-bg;
+      color: v.$color-error;
+    }
+  }
+}
+
+// ===== New Essay Button =====
+
+.newEssayBtn {
+  display: none;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-2 v.$space-4;
+  background-color: v.$color-accent;
+  color: v.$color-text-inverse;
+  border: none;
+  border-radius: v.$radius-md;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  font-family: v.$font-sans;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color v.$transition-fast;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: v.$color-accent-dark;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring(v.$color-accent);
+  }
+
+  @media (min-width: v.$bp-md) {
+    display: inline-flex;
+  }
+}
+
+// ===== Main Content =====
+
+.main {
+  flex: 1;
+}
+
+// ===== Footer =====
+
+.footer {
+  background-color: v.$color-bg-card;
+  border-top: 1px solid v.$color-border;
+  padding: v.$space-12 v.$space-6 v.$space-8;
+
+  @media (min-width: v.$bp-lg) {
+    padding: v.$space-12 v.$space-10 v.$space-8;
+  }
+}
+
+.footerInner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.footerTop {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-10;
+  margin-bottom: v.$space-10;
+
+  @media (min-width: v.$bp-md) {
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: v.$space-8;
+  }
+}
+
+// Brand column
+.footerBrand {
+  @include m.flex-col;
+  gap: v.$space-4;
+}
+
+.footerTagline {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  line-height: v.$line-height-relaxed;
+  max-width: 22rem;
+}
+
+.footerSocials {
+  display: flex;
+  gap: v.$space-3;
+  margin-top: v.$space-1;
+}
+
+.footerSocialLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: v.$radius-md;
+  color: v.$color-text-muted;
+  background-color: v.$color-bg-subtle;
+  border: 1px solid v.$color-border;
+  text-decoration: none;
+  transition: color v.$transition-fast, background-color v.$transition-fast, border-color v.$transition-fast;
+
+  &:hover {
+    color: v.$color-text-primary;
+    background-color: v.$color-bg-hover;
+    border-color: v.$color-border-strong;
+  }
+}
+
+// Nav columns
+.footerCol {
+  @include m.flex-col;
+  gap: v.$space-3;
+}
+
+.footerColHeading {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: v.$tracking-widest;
+  color: v.$color-text-primary;
+  margin-bottom: v.$space-1;
+}
+
+.footerColLink {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  text-decoration: none;
+  transition: color v.$transition-fast;
+  line-height: v.$line-height-snug;
+
+  &:hover {
+    color: v.$color-text-accent;
+  }
+}
+
+// Footer bottom bar
+.footerBottom {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+  padding-top: v.$space-8;
+  border-top: 1px solid v.$color-border;
+
+  @media (min-width: v.$bp-md) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.footerCopy {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+}
+
+.footerLegal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: v.$space-4;
+}
+
+.footerLegalLink {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  text-decoration: none;
+  transition: color v.$transition-fast;
+
+  &:hover {
+    color: v.$color-text-secondary;
+  }
+}
+
+// ===== Mobile nav overlay trigger =====
+.mobileMenuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: v.$radius-md;
+  border: none;
+  background: none;
+  color: v.$color-text-secondary;
+  cursor: pointer;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  @media (min-width: v.$bp-md) {
+    display: none;
+  }
+}
+
+// ===== Mobile nav drawer =====
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+  padding: v.$space-3 v.$space-4;
+  background-color: v.$color-bg-card;
+  border-bottom: 1px solid v.$color-border;
+  animation: fade-in-down 0.15s v.$ease-default both;
+
+  @media (min-width: v.$bp-md) {
+    display: none;
+  }
+}
+
+.mobileNavLink {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  padding: v.$space-3 v.$space-3;
+  border-radius: v.$radius-md;
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-secondary;
+  text-decoration: none;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  &.mobileNavLinkActive {
+    background-color: v.$color-accent-light;
+    color: v.$color-accent-dark;
+  }
+}

@@ -1,0 +1,251 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+@use '../animations' as animations;
+
+// ===== Onboarding Card =====
+
+.card {
+  width: 100%;
+  max-width: 520px;
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+  box-shadow: v.$shadow-card;
+  padding: v.$space-8 v.$space-8 v.$space-10;
+  animation: fade-in-up 0.35s v.$ease-default both;
+
+  @media (max-width: #{v.$bp-sm - 1px}) {
+    padding: v.$space-6 v.$space-5 v.$space-8;
+    border-radius: v.$radius-xl;
+  }
+}
+
+.eyebrow {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-medium;
+  text-transform: uppercase;
+  letter-spacing: v.$tracking-widest;
+  color: v.$color-text-accent;
+  margin-bottom: v.$space-2;
+}
+
+.heading {
+  font-size: v.$font-size-2xl;
+  font-weight: v.$font-weight-semibold;
+  letter-spacing: v.$tracking-tight;
+  color: v.$color-text-primary;
+  margin-bottom: v.$space-1;
+  line-height: v.$line-height-tight;
+}
+
+.subheading {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  margin-bottom: v.$space-8;
+  line-height: v.$line-height-relaxed;
+}
+
+// ===== Avatar Picker =====
+
+.avatarSection {
+  display: flex;
+  align-items: center;
+  gap: v.$space-5;
+  margin-bottom: v.$space-7;
+}
+
+.avatarButton {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: v.$radius-full;
+  border: 2px dashed v.$color-border-strong;
+  background-color: v.$color-bg-subtle;
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: border-color v.$transition-fast;
+
+  &:hover {
+    border-color: v.$color-accent;
+
+    .avatarOverlay {
+      opacity: 1;
+    }
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatarPlaceholder {
+  @include m.flex-center;
+  width: 100%;
+  height: 100%;
+  color: v.$color-text-muted;
+}
+
+.avatarOverlay {
+  @include m.flex-center;
+  position: absolute;
+  inset: 0;
+  background-color: rgba(v.$color-text-primary, 0.45);
+  color: v.$color-text-inverse;
+  opacity: 0;
+  transition: opacity v.$transition-fast;
+  border-radius: v.$radius-full;
+}
+
+.avatarMeta {
+  @include m.flex-col;
+  gap: v.$space-1;
+}
+
+.avatarLabel {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-primary;
+}
+
+.avatarHint {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+}
+
+// ===== Form Fields =====
+
+.fields {
+  @include m.flex-col;
+  gap: v.$space-5;
+}
+
+.textarea {
+  width: 100%;
+  padding: v.$space-3 v.$space-4;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-base;
+  color: v.$color-text-primary;
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-md;
+  resize: vertical;
+  min-height: 96px;
+  transition: border-color v.$transition-fast, box-shadow v.$transition-fast;
+  line-height: v.$line-height-relaxed;
+
+  &::placeholder {
+    color: v.$color-text-placeholder;
+  }
+
+  &:hover {
+    border-color: v.$color-border-strong;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: v.$color-border-focus;
+    box-shadow: 0 0 0 3px rgba(v.$color-border-focus, 0.18);
+  }
+
+  &.textareaError {
+    border-color: v.$color-border-error;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(v.$color-border-error, 0.18);
+    }
+  }
+}
+
+.charCount {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  text-align: right;
+  margin-top: v.$space-1;
+
+  &.charCountWarn {
+    color: v.$color-warning;
+  }
+}
+
+// ===== Submit =====
+
+.actions {
+  margin-top: v.$space-8;
+}
+
+.submitButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-2;
+  padding: v.$space-3 v.$space-5;
+  background-color: v.$color-accent;
+  color: v.$color-text-inverse;
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  font-family: v.$font-sans;
+  border: none;
+  border-radius: v.$radius-md;
+  cursor: pointer;
+  transition: background-color v.$transition-fast;
+
+  &:hover:not(:disabled) {
+    background-color: v.$color-accent-dark;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring(v.$color-accent);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.spinner {
+  animation: spin 0.75s linear infinite;
+}
+
+// ===== Success Banner =====
+
+.successBanner {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-3 v.$space-4;
+  background-color: v.$color-success-bg;
+  border: 1px solid v.$color-success-border;
+  border-radius: v.$radius-md;
+  color: v.$color-success;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  margin-top: v.$space-4;
+  animation: fade-in 0.2s v.$ease-default both;
+}
+
+// ===== Error Banner =====
+
+.errorBanner {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-3 v.$space-4;
+  background-color: v.$color-error-bg;
+  border: 1px solid v.$color-error-border;
+  border-radius: v.$radius-md;
+  color: v.$color-error;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  margin-top: v.$space-4;
+  animation: fade-in 0.2s v.$ease-default both;
+}
