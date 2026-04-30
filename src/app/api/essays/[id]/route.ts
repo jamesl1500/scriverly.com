@@ -75,8 +75,16 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
       .select()
       .single();
 
-    if (error || !essay) {
-      return errorResponse('Essay not found or update failed.', 404, 'not_found');
+    if (error) {
+      // PGRST116 = no rows matched (not found / wrong user)
+      if (error.code === 'PGRST116') {
+        return errorResponse('Essay not found.', 404, 'not_found');
+      }
+      return errorResponse('Failed to update essay.', 500);
+    }
+
+    if (!essay) {
+      return errorResponse('Essay not found.', 404, 'not_found');
     }
 
     return successResponse({ essay });

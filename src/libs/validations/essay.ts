@@ -70,7 +70,7 @@ export const essayStep2Schema = z.object({
   ]),
   academic_level: z.enum([
     'high_school', 'undergraduate', 'graduate', 'doctoral',
-  ]),
+  ] as const),
   citation_style: z.enum(['APA', 'MLA', 'Chicago']),
 });
 
