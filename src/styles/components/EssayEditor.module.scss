@@ -231,9 +231,11 @@
 .editorBody {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: v.$space-8 v.$space-6;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
 
   // Custom scrollbar (webkit)
   scrollbar-width: thin;
@@ -256,6 +258,7 @@
 .editorContent {
   width: 100%;
   max-width: 720px;
+  min-width: 0; // prevent flex overflow
   background: #ffffff;
   border-radius: v.$radius-lg;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.03);
@@ -265,27 +268,42 @@
   // ── Page-break widget ──
   :global([data-page-break]) {
     display: block;
-    width: 100%;
+    width: calc(100% + 5rem); // bleed past the v.$space-10 padding on both sides
+    margin-left: -2.5rem;
     border: none;
-    border-top: 1.5px dashed v.$color-border;
-    margin: 2.5rem 0;
+    border-top: 1.5px solid v.$color-border-strong;
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
     position: relative;
     pointer-events: none;
     user-select: none;
 
+    &::before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: -8px;
+      left: 0;
+      right: 0;
+      height: 14px;
+      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.025));
+    }
+
     &::after {
-      content: '· ' attr(data-page-break) ' words ·';
+      content: 'Page ' attr(data-page-num);
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      top: -0.625em;
+      top: -0.7em;
       font-size: v.$font-size-xs;
-      color: v.$color-text-placeholder;
+      font-weight: v.$font-weight-medium;
+      color: v.$color-text-muted;
       background: #ffffff;
-      padding: 0 v.$space-2;
+      padding: 0 v.$space-3;
       white-space: nowrap;
       font-family: v.$font-sans;
-      letter-spacing: v.$tracking-wide;
+      letter-spacing: v.$tracking-widest;
+      text-transform: uppercase;
     }
   }
 
@@ -298,6 +316,8 @@
     line-height: 1.75;
     color: v.$color-text-primary;
     caret-color: v.$color-accent;
+    overflow-wrap: break-word;
+    word-break: break-word;
 
     // ── Headings ──
     h1 {
@@ -459,7 +479,7 @@
 .statusBarInner {
   width: 100%;
   max-width: 1280px;
-  padding: 0 v.$space-4;
+  padding: 0 v.$space-6;
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -48,7 +48,8 @@ const PageBreakExtension = Extension.create({
             const { doc } = state;
             const decos: Decoration[] = [];
             let words = 0;
-            let nextMark = 500;
+            let nextMark = 200; // ~1 double-spaced page
+            const WORDS_PER_PAGE = 200;
 
             doc.nodesBetween(0, doc.content.size, (node, pos, parent) => {
               if (parent !== doc) return false;
@@ -64,6 +65,7 @@ const PageBreakExtension = Extension.create({
                     () => {
                       const el = document.createElement('div');
                       el.setAttribute('data-page-break', String(mark));
+                      el.setAttribute('data-page-num', String(Math.round(mark / WORDS_PER_PAGE) + 1));
                       el.setAttribute('contenteditable', 'false');
                       el.setAttribute('aria-hidden', 'true');
                       return el;
@@ -74,7 +76,7 @@ const PageBreakExtension = Extension.create({
               }
 
               words += nodeWords;
-              while (words >= nextMark) nextMark += 500;
+              while (words >= nextMark) nextMark += WORDS_PER_PAGE;
 
               return false; // don't recurse into block children
             });

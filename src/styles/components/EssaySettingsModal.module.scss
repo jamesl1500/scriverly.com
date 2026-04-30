@@ -1,0 +1,274 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+
+// ── Backdrop + Dialog ──────────────────────────────────────
+
+.dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  width: min(560px, calc(100vw - 2rem));
+  max-height: calc(100dvh - 4rem);
+  overflow: visible;
+  z-index: v.$z-modal;
+
+  &::backdrop {
+    background-color: rgba(28, 25, 23, 0.48);
+    backdrop-filter: blur(2px);
+  }
+
+  // Entry animation
+  &[open] .panel {
+    animation: settings-in 0.18s v.$ease-default both;
+  }
+}
+
+@keyframes settings-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// ── Panel (the white card) ─────────────────────────────────
+
+.panel {
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-xl;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.08),
+    0 16px 40px -4px rgba(0, 0, 0, 0.14);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 4rem);
+  overflow: hidden;
+}
+
+// ── Header ────────────────────────────────────────────────
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: v.$space-4 v.$space-5;
+  border-bottom: 1px solid v.$color-border;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tight;
+  margin: 0;
+}
+
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: v.$radius-md;
+  background: none;
+  border: none;
+  color: v.$color-text-secondary;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+// ── Form ──────────────────────────────────────────────────
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: v.$color-border transparent;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: v.$color-border;
+    border-radius: v.$radius-full;
+  }
+}
+
+// ── Sections ──────────────────────────────────────────────
+
+.section {
+  padding: v.$space-4 v.$space-5;
+
+  & + & {
+    border-top: 1px solid v.$color-border;
+  }
+}
+
+.sectionTitle {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-muted;
+  letter-spacing: v.$tracking-widest;
+  text-transform: uppercase;
+  margin: 0 0 v.$space-3;
+}
+
+// ── Field layouts ─────────────────────────────────────────
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: v.$space-3;
+
+  @media (max-width: #{v.$bp-sm - 1px}) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Select (matches Input shell styling) ──────────────────
+
+.select {
+  @include m.input-shell;
+  width: 100%;
+  height: v.$input-height-md;
+  padding: 0 v.$space-3;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-base;
+  color: v.$color-text-primary;
+  background-color: v.$color-bg-card;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239C9087' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right v.$space-3 center;
+  padding-right: v.$space-8;
+
+  &:focus {
+    outline: none;
+    border-color: v.$color-border-focus;
+    box-shadow: 0 0 0 3px rgba(v.$color-accent, 0.14);
+  }
+}
+
+// ── Textarea (matches Input shell styling) ────────────────
+
+.textarea {
+  @include m.input-shell;
+  width: 100%;
+  padding: v.$space-2 v.$space-3;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-base;
+  color: v.$color-text-primary;
+  background-color: v.$color-bg-card;
+  resize: vertical;
+  min-height: 5rem;
+  line-height: v.$line-height-relaxed;
+
+  &::placeholder {
+    color: v.$color-text-placeholder;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: v.$color-border-focus;
+    box-shadow: 0 0 0 3px rgba(v.$color-accent, 0.14);
+  }
+}
+
+// ── Error message ─────────────────────────────────────────
+
+.errorMsg {
+  margin: 0;
+  padding: v.$space-2 v.$space-5;
+  font-size: v.$font-size-sm;
+  color: v.$color-error;
+}
+
+// ── Footer ────────────────────────────────────────────────
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: v.$space-2;
+  padding: v.$space-3 v.$space-5;
+  border-top: 1px solid v.$color-border;
+  flex-shrink: 0;
+}
+
+.cancelBtn {
+  height: v.$input-height-sm;
+  padding: 0 v.$space-4;
+  border-radius: v.$radius-md;
+  border: 1.5px solid v.$color-border;
+  background: none;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-secondary;
+  cursor: pointer;
+  transition: background-color v.$transition-fast, border-color v.$transition-fast, color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    border-color: v.$color-border-strong;
+    color: v.$color-text-primary;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+.saveBtn {
+  height: v.$input-height-sm;
+  padding: 0 v.$space-5;
+  border-radius: v.$radius-md;
+  border: none;
+  background-color: v.$color-accent;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-inverse;
+  cursor: pointer;
+  transition: background-color v.$transition-fast, opacity v.$transition-fast;
+
+  &:hover:not(:disabled) {
+    background-color: v.$color-accent-dark;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
