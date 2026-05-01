@@ -1,0 +1,588 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+
+// ===== Shared container =====
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-left: v.$space-6;
+  padding-right: v.$space-6;
+
+  @include m.lg {
+    padding-left: v.$space-10;
+    padding-right: v.$space-10;
+  }
+}
+
+// ===== Hero =====
+
+.hero {
+  padding: v.$space-24 0 v.$space-20;
+  text-align: center;
+  background-image: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(200, 133, 74, 0.10) 0%,
+    transparent 70%
+  );
+
+  @include m.md {
+    padding: v.$space-24 0;
+  }
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-1 v.$space-3;
+  border-radius: v.$radius-full;
+  border: 1px solid rgba(v.$color-accent, 0.25);
+  background-color: v.$color-accent-lighter;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-accent-dark;
+  letter-spacing: v.$tracking-wide;
+  text-transform: uppercase;
+  margin-bottom: v.$space-8;
+}
+
+.heroTitle {
+  font-size: v.$font-size-3xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tighter;
+  line-height: v.$line-height-tight;
+  max-width: 38rem;
+  margin: 0 auto v.$space-6;
+
+  @include m.md {
+    font-size: v.$font-size-4xl;
+  }
+
+  span {
+    color: v.$color-accent;
+  }
+}
+
+.heroSubtitle {
+  font-size: v.$font-size-lg;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+  max-width: 30rem;
+  margin: 0 auto v.$space-10;
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: v.$space-4;
+}
+
+.heroPrimary {
+  display: inline-flex;
+  align-items: center;
+  padding: v.$space-3 v.$space-8;
+  border-radius: v.$radius-full;
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-inverse;
+  background-color: v.$color-accent;
+  text-decoration: none;
+  transition: background-color v.$transition-fast, box-shadow v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-accent-dark;
+    box-shadow: v.$shadow-md;
+  }
+}
+
+.heroSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-3 v.$space-6;
+  border-radius: v.$radius-full;
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-secondary;
+  background-color: transparent;
+  border: 1px solid v.$color-border-strong;
+  text-decoration: none;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+}
+
+.heroNote {
+  margin-top: v.$space-6;
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+}
+
+// ===== Features =====
+
+.features {
+  padding: v.$space-20 0;
+  border-top: 1px solid v.$color-border;
+  background-color: v.$color-bg-card;
+}
+
+.sectionLabel {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: v.$tracking-wider;
+  color: v.$color-accent;
+  margin-bottom: v.$space-4;
+}
+
+.sectionTitle {
+  font-size: v.$font-size-2xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tight;
+  margin-bottom: v.$space-4;
+
+  @include m.md {
+    font-size: v.$font-size-3xl;
+  }
+}
+
+.sectionSubtitle {
+  font-size: v.$font-size-base;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+  max-width: 34rem;
+  margin-bottom: v.$space-14;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-6;
+
+  @include m.md {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include m.lg {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.featureCard {
+  background-color: v.$color-bg-page;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+  padding: v.$space-6;
+  transition: box-shadow v.$transition-base, border-color v.$transition-base;
+
+  &:hover {
+    box-shadow: v.$shadow-md;
+    border-color: v.$color-border-strong;
+  }
+}
+
+.featureIcon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: v.$radius-md;
+  background-color: v.$color-accent-light;
+  color: v.$color-accent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: v.$space-4;
+}
+
+.featureTitle {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  margin-bottom: v.$space-2;
+}
+
+.featureDesc {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+}
+
+// ===== How it works =====
+
+.howItWorks {
+  padding: v.$space-20 0;
+  border-top: 1px solid v.$color-border;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-10;
+
+  @include m.md {
+    grid-template-columns: repeat(3, 1fr);
+    gap: v.$space-8;
+  }
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-4;
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: v.$radius-full;
+  background-color: v.$color-accent;
+  color: v.$color-text-inverse;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-bold;
+  flex-shrink: 0;
+}
+
+.stepTitle {
+  font-size: v.$font-size-lg;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+}
+
+.stepDesc {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+}
+
+// ===== CTA band =====
+
+.ctaBand {
+  padding: v.$space-20 0;
+  border-top: 1px solid v.$color-border;
+  background-color: v.$color-accent-lighter;
+  text-align: center;
+}
+
+.ctaTitle {
+  font-size: v.$font-size-2xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tight;
+  margin-bottom: v.$space-4;
+
+  @include m.md {
+    font-size: v.$font-size-3xl;
+  }
+}
+
+.ctaSubtitle {
+  font-size: v.$font-size-base;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+  max-width: 28rem;
+  margin: 0 auto v.$space-10;
+}
+
+// ===== Prose pages (about, terms, privacy) =====
+
+.prosePage {
+  padding: v.$space-16 0 v.$space-24;
+}
+
+.proseHeader {
+  padding-bottom: v.$space-10;
+  border-bottom: 1px solid v.$color-border;
+  margin-bottom: v.$space-12;
+}
+
+.proseEyebrow {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: v.$tracking-wider;
+  color: v.$color-accent;
+  margin-bottom: v.$space-4;
+}
+
+.proseTitle {
+  font-size: v.$font-size-3xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tighter;
+  margin-bottom: v.$space-4;
+}
+
+.proseSubtitle {
+  font-size: v.$font-size-lg;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+  max-width: 36rem;
+}
+
+.proseMeta {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  margin-top: v.$space-4;
+}
+
+.proseBody {
+  max-width: 48rem;
+
+  h2 {
+    font-size: v.$font-size-xl;
+    font-weight: v.$font-weight-semibold;
+    color: v.$color-text-primary;
+    letter-spacing: v.$tracking-tight;
+    margin: v.$space-12 0 v.$space-4;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  h3 {
+    font-size: v.$font-size-base;
+    font-weight: v.$font-weight-semibold;
+    color: v.$color-text-primary;
+    margin: v.$space-8 0 v.$space-3;
+  }
+
+  p {
+    font-size: v.$font-size-base;
+    color: v.$color-text-secondary;
+    line-height: v.$line-height-relaxed;
+    margin-bottom: v.$space-5;
+  }
+
+  ul, ol {
+    padding-left: v.$space-6;
+    margin-bottom: v.$space-5;
+
+    li {
+      font-size: v.$font-size-base;
+      color: v.$color-text-secondary;
+      line-height: v.$line-height-relaxed;
+      margin-bottom: v.$space-2;
+    }
+  }
+
+  strong {
+    font-weight: v.$font-weight-semibold;
+    color: v.$color-text-primary;
+  }
+
+  a {
+    color: v.$color-accent;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: v.$color-accent-dark;
+    }
+  }
+}
+
+// ===== About — Value cards =====
+
+.valuesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-6;
+  margin-top: v.$space-10;
+  margin-bottom: v.$space-12;
+
+  @include m.md {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.valueCard {
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+  padding: v.$space-6;
+}
+
+.valueIcon {
+  font-size: 1.5rem;
+  margin-bottom: v.$space-4;
+}
+
+.valueTitle {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  margin-bottom: v.$space-2;
+}
+
+.valueDesc {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+}
+
+// ===== Contact =====
+
+.contactGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-12;
+
+  @include m.lg {
+    grid-template-columns: 1fr 2fr;
+    gap: v.$space-16;
+  }
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-8;
+}
+
+.contactInfoBlock {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+.contactInfoLabel {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: v.$tracking-wider;
+  color: v.$color-text-muted;
+}
+
+.contactInfoValue {
+  font-size: v.$font-size-base;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+
+  a {
+    color: v.$color-accent;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+}
+
+.contactForm {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-5;
+}
+
+.contactFormRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-5;
+
+  @include m.sm {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.contactField {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+.contactLabel {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-primary;
+}
+
+.contactInput {
+  height: v.$input-height-md;
+  padding: 0 v.$space-4;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-sm;
+  background-color: v.$color-bg-card;
+  font-size: v.$font-size-base;
+  color: v.$color-text-primary;
+  transition: border-color v.$transition-fast, box-shadow v.$transition-fast;
+  font-family: inherit;
+  width: 100%;
+
+  &::placeholder {
+    color: v.$color-text-placeholder;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: v.$color-border-focus;
+    box-shadow: 0 0 0 3px rgba(v.$color-accent, 0.12);
+  }
+}
+
+.contactTextarea {
+  @extend .contactInput;
+  height: auto;
+  padding: v.$space-3 v.$space-4;
+  resize: vertical;
+  min-height: 8rem;
+  line-height: v.$line-height-relaxed;
+}
+
+.contactSubmit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-2;
+  padding: v.$space-3 v.$space-8;
+  border-radius: v.$radius-full;
+  border: none;
+  background-color: v.$color-accent;
+  color: v.$color-text-inverse;
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color v.$transition-fast, box-shadow v.$transition-fast;
+  align-self: flex-start;
+
+  &:hover:not(:disabled) {
+    background-color: v.$color-accent-dark;
+    box-shadow: v.$shadow-md;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.contactSuccess {
+  display: flex;
+  align-items: flex-start;
+  gap: v.$space-3;
+  padding: v.$space-5 v.$space-6;
+  border-radius: v.$radius-lg;
+  background-color: v.$color-success-bg;
+  border: 1px solid v.$color-success-border;
+  font-size: v.$font-size-base;
+  color: v.$color-success;
+  line-height: v.$line-height-relaxed;
+}
+
+.contactError {
+  font-size: v.$font-size-sm;
+  color: v.$color-error;
+  margin-top: v.$space-1;
+}
