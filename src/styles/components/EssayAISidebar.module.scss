@@ -1,0 +1,662 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+
+// ===== AI Sidebar Shell =====
+
+.sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: v.$color-bg-card;
+  border-left: 1px solid v.$color-border;
+  overflow: hidden;
+  min-height: 0; // allow flex child to shrink so .content can scroll
+
+  // Smooth slide-in animation
+  animation: slideIn 0.2s ease-out;
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}
+
+// ===== Header =====
+
+.header {
+  flex-shrink: 0;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 v.$space-4;
+  border-bottom: 1px solid v.$color-border;
+  background-color: v.$color-bg-card;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+}
+
+.headerIcon {
+  color: v.$color-accent;
+}
+
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: v.$radius-sm;
+  background: none;
+  border: none;
+  color: v.$color-text-muted;
+  cursor: pointer;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+// ===== Scrollable Content =====
+
+.content {
+  flex: 1;
+  min-height: 0; // without this, min-height:auto lets the div expand past its flex bounds instead of scrolling
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: v.$space-4;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+
+  scrollbar-width: thin;
+  scrollbar-color: v.$color-border transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: v.$color-border;
+    border-radius: v.$radius-full;
+  }
+}
+
+// ===== Loading State =====
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: v.$space-3;
+  padding: v.$space-10 v.$space-4;
+  color: v.$color-text-muted;
+  font-size: v.$font-size-sm;
+  text-align: center;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid v.$color-border;
+  border-top-color: v.$color-accent;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+}
+
+// ===== Error State =====
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-6 v.$space-4;
+  text-align: center;
+  color: v.$color-error;
+  font-size: v.$font-size-sm;
+}
+
+// ===== Empty State =====
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: v.$space-3;
+  padding: v.$space-8 v.$space-2;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: v.$radius-xl;
+  background-color: v.$color-accent-light;
+  color: v.$color-accent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyTitle {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  margin: 0;
+}
+
+.emptyDesc {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  line-height: 1.6;
+  margin: 0;
+}
+
+// ===== Analyze / Re-analyze Buttons =====
+
+.analyzeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-2;
+  padding: v.$space-2 v.$space-4;
+  border-radius: v.$radius-md;
+  background-color: v.$color-accent;
+  color: v.$color-text-inverse;
+  border: none;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  cursor: pointer;
+  transition: background-color v.$transition-fast;
+  width: 100%;
+  margin-top: v.$space-1;
+
+  &:hover {
+    background-color: v.$color-accent-dark;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+.reanalyzeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-2;
+  padding: v.$space-2 v.$space-3;
+  border-radius: v.$radius-md;
+  background-color: v.$color-bg-subtle;
+  color: v.$color-text-secondary;
+  border: 1px solid v.$color-border;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-medium;
+  cursor: pointer;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+  width: 100%;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+// ===== Score Section =====
+
+.scoreSection {
+  display: flex;
+  align-items: center;
+  gap: v.$space-4;
+  padding: v.$space-3;
+  background-color: v.$color-bg-subtle;
+  border-radius: v.$radius-lg;
+}
+
+.scoreRing {
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+}
+
+.scoreMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.scoreGrade {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  margin: 0 0 v.$space-1;
+  line-height: 1.3;
+}
+
+.scoreDate {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  margin: 0;
+}
+
+// ===== Score Breakdown =====
+
+.breakdownSection {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+  padding: v.$space-3;
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-md;
+}
+
+.breakdownItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.breakdownLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: v.$font-size-xs;
+  color: v.$color-text-secondary;
+  font-weight: v.$font-weight-medium;
+}
+
+.breakdownTrack {
+  height: 4px;
+  background-color: v.$color-border;
+  border-radius: v.$radius-full;
+  overflow: hidden;
+}
+
+.breakdownFill {
+  height: 100%;
+  border-radius: v.$radius-full;
+  transition: width 0.5s ease;
+}
+
+// ===== Overall Feedback =====
+
+.feedbackSection {
+  padding: v.$space-3;
+  background-color: v.$color-accent-lighter;
+  border-left: 3px solid v.$color-accent;
+  border-radius: 0 v.$radius-md v.$radius-md 0;
+}
+
+.feedbackTitle {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-accent-dark;
+  margin: 0 0 v.$space-1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.feedbackText {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  line-height: 1.65;
+  margin: 0;
+}
+
+// ===== Collapsible Section =====
+
+.section {
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-md;
+  overflow: autoi;
+}
+
+.sectionToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-2 v.$space-3;
+  background-color: v.$color-bg-subtle;
+  border: none;
+  cursor: pointer;
+  font-family: v.$font-sans;
+  color: v.$color-text-primary;
+  text-align: left;
+  transition: background-color v.$transition-fast;
+  border-top-left-radius: v.$radius-md;
+  border-top-right-radius: v.$radius-md;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+.sectionTitle {
+  flex: 1;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: v.$color-text-secondary;
+}
+
+.sectionCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 4px;
+  border-radius: v.$radius-full;
+  background-color: v.$color-border;
+  color: v.$color-text-secondary;
+  font-size: 0.625rem;
+  font-weight: v.$font-weight-semibold;
+  flex-shrink: 0;
+}
+
+.sectionBody {
+  padding: v.$space-2;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+// ===== Recommendation Group / Card =====
+
+.recGroup {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+.recCard {
+  padding: v.$space-3;
+  background-color: v.$color-bg-card;
+  border-radius: v.$radius-sm;
+  border: 1px solid v.$color-border;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+.recHeader {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+}
+
+.severityBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: v.$radius-full;
+  font-size: 0.625rem;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.severityHigh {
+  background-color: #FFF2F2;
+  color: v.$color-error;
+}
+
+.severityMedium {
+  background-color: v.$color-warning-bg;
+  color: v.$color-warning;
+}
+
+.severityLow {
+  background-color: v.$color-accent-lighter;
+  color: v.$color-accent-dark;
+}
+
+.recType {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  text-transform: capitalize;
+}
+
+.recMessage {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-primary;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.recStrategy {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-secondary;
+  line-height: 1.55;
+  margin: 0;
+  font-style: italic;
+}
+
+.recCardApplied {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+// ── Before / After example block ──────────────────────────
+
+.recExample {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: v.$radius-sm;
+  overflow: hidden;
+  border: 1px solid v.$color-border;
+  font-size: v.$font-size-xs;
+}
+
+.recExampleBefore {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: v.$space-2;
+  background-color: #FFF2F2;
+
+  p {
+    margin: 0;
+    color: #B83C3C;
+    line-height: 1.5;
+    font-style: italic;
+  }
+}
+
+.recExampleAfter {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: v.$space-2;
+  background-color: v.$color-success-bg;
+
+  p {
+    margin: 0;
+    color: darken(#3A9A6B, 5%);
+    line-height: 1.5;
+    font-style: italic;
+  }
+}
+
+.recExampleLabel {
+  font-size: 0.6rem;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+}
+
+// ===== Spelling & Grammar Cards =====
+
+.grammarCard {
+  padding: v.$space-3;
+  background-color: v.$color-bg-card;
+  border-radius: v.$radius-sm;
+  border: 1px solid v.$color-border;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+}
+
+.grammarDiff {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  flex-wrap: wrap;
+}
+
+.grammarOriginal {
+  font-size: v.$font-size-sm;
+  font-family: v.$font-mono;
+  color: v.$color-error;
+  text-decoration: line-through;
+  text-decoration-color: rgba(212, 73, 73, 0.5);
+  background-color: #FFF2F2;
+  padding: 1px 5px;
+  border-radius: v.$radius-xs;
+}
+
+.grammarSuggestion {
+  font-size: v.$font-size-sm;
+  font-family: v.$font-mono;
+  color: v.$color-success;
+  background-color: v.$color-success-bg;
+  padding: 1px 5px;
+  border-radius: v.$radius-xs;
+}
+
+.grammarArrow {
+  color: v.$color-text-muted;
+  flex-shrink: 0;
+}
+
+.grammarReason {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.grammarCardApplied {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+// ===== Implement / Copy / Apply Buttons =====
+
+.implementBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-1;
+  align-self: flex-start;
+  margin-top: v.$space-1;
+  padding: 3px 10px;
+  border-radius: v.$radius-full;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color v.$transition-fast, color v.$transition-fast, border-color v.$transition-fast;
+
+  // default variant (copy tip for style recs)
+  background-color: v.$color-bg-subtle;
+  color: v.$color-text-secondary;
+  border-color: v.$color-border;
+
+  &:hover:not(:disabled) {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Apply fix variant (grammar) — green tint
+.implementBtnApply {
+  background-color: v.$color-success-bg;
+  color: v.$color-success;
+  border-color: v.$color-success-border;
+
+  &:hover:not(:disabled) {
+    background-color: #d1fae5;
+    color: darken(#3A9A6B, 8%);
+  }
+}
+
+// Done / applied / copied state
+.implementBtnDone {
+  background-color: v.$color-bg-subtle;
+  color: v.$color-text-muted;
+  border-color: v.$color-border;
+  cursor: default;
+  pointer-events: none;
+}
+
+// ===== All-clear row =====
+
+.allClearSection {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-2 v.$space-3;
+  background-color: v.$color-success-bg;
+  border: 1px solid v.$color-success-border;
+  border-radius: v.$radius-md;
+  font-size: v.$font-size-sm;
+  color: v.$color-success;
+  font-weight: v.$font-weight-medium;
+}
+
+.allClearIcon {
+  flex-shrink: 0;
+}

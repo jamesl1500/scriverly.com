@@ -1,0 +1,344 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+
+// ── Panel shell ──────────────────────────────────────────────────────────────
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: 272px;
+  flex-shrink: 0;
+  background-color: v.$color-bg-card;
+  border-right: 1px solid v.$color-border;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: v.$space-3 v.$space-3 v.$space-3 v.$space-4;
+  border-bottom: 1px solid v.$color-border;
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+}
+
+.headerIcon {
+  color: v.$color-accent;
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tight;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: v.$space-1;
+}
+
+.regenBtn,
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: v.$radius-md;
+  background: none;
+  border: none;
+  color: v.$color-text-muted;
+  cursor: pointer;
+  transition: background-color v.$transition-fast, color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+    color: v.$color-text-primary;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+// ── Spinning animation ───────────────────────────────────────────────────────
+
+.spinning {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Body (scrollable) ────────────────────────────────────────────────────────
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: v.$color-border transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: v.$color-border;
+    border-radius: v.$radius-full;
+  }
+}
+
+// ── Empty / generating states ─────────────────────────────────────────────────
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-8 v.$space-4;
+  text-align: center;
+}
+
+.emptyIcon {
+  color: v.$color-accent;
+  opacity: 0.7;
+}
+
+.emptyTitle {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  margin: 0;
+}
+
+.emptyText {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+  margin: 0;
+}
+
+.generateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-1;
+  margin-top: v.$space-2;
+  height: v.$input-height-sm;
+  padding: 0 v.$space-4;
+  border-radius: v.$radius-md;
+  border: none;
+  background-color: v.$color-accent;
+  font-family: v.$font-sans;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-inverse;
+  cursor: pointer;
+  transition: background-color v.$transition-fast;
+
+  &:hover:not(:disabled) {
+    background-color: v.$color-accent-dark;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+.generatingState {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+  padding: v.$space-4;
+}
+
+.generatingSkeleton {
+  height: 0.625rem;
+  width: 100%;
+  border-radius: v.$radius-full;
+  background: linear-gradient(
+    90deg,
+    v.$color-bg-subtle 25%,
+    v.$color-bg-hover   50%,
+    v.$color-bg-subtle 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ── Error ─────────────────────────────────────────────────────────────────────
+
+.errorMsg {
+  margin: v.$space-3 v.$space-4;
+  padding: v.$space-2 v.$space-3;
+  border-radius: v.$radius-sm;
+  background-color: v.$color-error-bg;
+  border: 1px solid v.$color-error-border;
+  font-size: v.$font-size-xs;
+  color: v.$color-error;
+  line-height: v.$line-height-relaxed;
+}
+
+// ── Sections ──────────────────────────────────────────────────────────────────
+
+.sections {
+  padding: v.$space-2 0;
+}
+
+.section {
+  & + & {
+    border-top: 1px solid v.$color-border;
+  }
+}
+
+.sectionToggle {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  width: 100%;
+  padding: v.$space-2 v.$space-3 v.$space-2 v.$space-4;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-subtle;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+
+  svg {
+    color: v.$color-text-muted;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+}
+
+.sectionLabel {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-muted;
+  text-transform: uppercase;
+  letter-spacing: v.$tracking-widest;
+}
+
+.sectionCount {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-placeholder;
+  font-weight: v.$font-weight-regular;
+}
+
+// ── Outline items ────────────────────────────────────────────────────────────
+
+.itemList {
+  list-style: none;
+  margin: 0;
+  padding: v.$space-1 0 v.$space-2;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: v.$space-2;
+  padding: v.$space-2 v.$space-3 v.$space-2 v.$space-3;
+  transition: opacity v.$transition-fast;
+
+  &:hover {
+    background-color: v.$color-bg-subtle;
+  }
+}
+
+.itemDone {
+  opacity: 0.45;
+
+  .itemHeading {
+    text-decoration: line-through;
+  }
+}
+
+.checkBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  border-radius: v.$radius-full;
+  transition: transform v.$transition-fast;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+.checkIcon {
+  color: v.$color-border-strong;
+}
+
+.checkIconDone {
+  color: v.$color-success;
+}
+
+.itemBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.itemHeading {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  line-height: v.$line-height-snug;
+  margin: 0;
+}
+
+.itemTalkingPoint {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+  margin: 0;
+  font-style: italic;
+}
