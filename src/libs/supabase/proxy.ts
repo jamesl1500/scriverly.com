@@ -37,15 +37,28 @@ export async function updateSession(request: NextRequest) {
   const user = data?.claims;
 
   // Redirect unauthenticated users to /login for protected routes.
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/signup') &&
-    !request.nextUrl.pathname.startsWith('/forgot_password') &&
-    !request.nextUrl.pathname.startsWith('/reset_password') &&
-    !request.nextUrl.pathname.startsWith('/verify-email') &&
-    !request.nextUrl.pathname.startsWith('/api/auth')
-  ) {
+  const publicPaths = [
+    '/',
+    '/about',
+    '/terms',
+    '/privacy',
+    '/contact',
+    '/login',
+    '/signup',
+    '/forgot_password',
+    '/reset_password',
+    '/verify-email',
+    '/api/auth',
+  ];
+
+  const isPublic =
+    publicPaths.some((p) =>
+      p === '/'
+        ? request.nextUrl.pathname === '/'
+        : request.nextUrl.pathname.startsWith(p),
+    ) || request.nextUrl.pathname.startsWith('/auth/');
+
+  if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
