@@ -17,12 +17,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email } = schema.parse(body);
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) {
+      return errorResponse('Server misconfiguration: NEXT_PUBLIC_APP_URL is not set.', 500, 'misconfiguration');
+    }
+
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        emailRedirectTo: `${appUrl}/auth/callback`,
       },
     });
 

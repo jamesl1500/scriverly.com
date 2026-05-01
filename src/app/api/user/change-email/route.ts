@@ -23,9 +23,14 @@ export async function POST(request: NextRequest) {
       return errorResponse('New email must be different from your current email.', 422, 'same_email');
     }
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) {
+      return errorResponse('Server misconfiguration: NEXT_PUBLIC_APP_URL is not set.', 500, 'misconfiguration');
+    }
+
     const { error } = await supabase.auth.updateUser(
       { email: newEmail },
-      { emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback` },
+      { emailRedirectTo: `${appUrl}/auth/callback` },
     );
 
     if (error) {
