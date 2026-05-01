@@ -10,8 +10,10 @@
  */
 import axios from 'axios';
 
+// Always use a root-relative path so requests are same-origin in every environment.
+// An absolute NEXT_PUBLIC_API_URL would cause CORS failures when withCredentials is true.
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? '/api',
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
