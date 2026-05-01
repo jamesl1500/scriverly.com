@@ -16,7 +16,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, username, bio, institution, department, academic_level, role, created_at')
+    .select('full_name, username, bio, institution, department, academic_level, role, avatar_url, created_at')
     .eq('user_id', user.id)
     .single();
 
@@ -42,6 +42,7 @@ export default async function ProfilePage() {
         initialValues={initialValues}
         email={user.email ?? ''}
         role={profile?.role ?? 'student'}
+        avatarUrl={profile?.avatar_url ?? ''}
         createdAt={profile?.created_at ?? user.created_at ?? new Date().toISOString()}
       />
     </div>

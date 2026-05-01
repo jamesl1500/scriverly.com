@@ -18,27 +18,24 @@
   top: 0;
   z-index: v.$z-sticky;
   height: 3.5rem;
-  padding: 0 v.$space-6;
   background-color: v.$color-bg-card;
   border-bottom: 1px solid v.$color-border;
-
-  @media (min-width: v.$bp-lg) {
-    padding: 0 v.$space-10;
-  }
 }
 
-.navContainer{
+.navContainer {
   max-width: 1280px;
   height: 3.5rem;
-
-  margin: 0% auto;
-
+  margin: 0 auto;
   display: flex;
   align-items: center;
   gap: v.$space-6;
+  padding-left: v.$space-6;
+  padding-right: v.$space-6;
 
-  padding-left: 2.5em;
-  padding-right: 2.5em;
+  @media (min-width: v.$bp-lg) {
+    padding-left: v.$space-10;
+    padding-right: v.$space-10;
+  }
 }
 
 .navLeft {
@@ -257,19 +254,20 @@
 .footer {
   background-color: v.$color-bg-card;
   border-top: 1px solid v.$color-border;
-  padding: v.$space-12 v.$space-6 v.$space-8;
-
-  @media (min-width: v.$bp-lg) {
-    padding: v.$space-12 v.$space-10 v.$space-8;
-  }
+  padding-top: v.$space-12;
+  padding-bottom: v.$space-8;
 }
 
 .footerInner {
   max-width: 1280px;
   margin: 0 auto;
+  padding-left: v.$space-6;
+  padding-right: v.$space-6;
 
-  padding-left: 2.5em;
-  padding-right: 2.5em;
+  @media (min-width: v.$bp-lg) {
+    padding-left: v.$space-10;
+    padding-right: v.$space-10;
+  }
 }
 
 .footerTop {

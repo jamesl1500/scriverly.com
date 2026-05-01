@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Camera, CheckCircle, Loader2, AlertCircle, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -34,7 +34,7 @@ export default function OnboardingForm({ initialData }: OnboardingFormProps) {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<OnboardingProfileInput>({
     resolver: zodResolver(onboardingProfileSchema),
@@ -45,7 +45,7 @@ export default function OnboardingForm({ initialData }: OnboardingFormProps) {
     },
   });
 
-  const bioValue = watch('bio') ?? '';
+  const bioValue = useWatch({ control, name: 'bio', defaultValue: '' }) ?? '';
 
   function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

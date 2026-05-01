@@ -1,94 +1,73 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { FileText, Clock, Plus, BookOpen, TrendingUp } from 'lucide-react';
+import type { Metadata } from 'next';
+
+import { createSupabaseServerClient } from '@/libs/supabase/server';
+import { ESSAY_TYPE_LABELS } from '@/libs/validations/essay';
 import styles from '@/styles/components/Dashboard.module.scss';
 
-type EssayStatus = 'published' | 'draft';
+export const metadata: Metadata = {
+  title: 'Dashboard — Scriverly',
+};
 
-interface Essay {
-  id: string;
-  title: string;
-  excerpt: string;
-  tag: string;
-  status: EssayStatus;
-  wordCount: number;
-  updatedAt: string;
-}
-
-const DUMMY_ESSAYS: Essay[] = [
-  {
-    id: '1',
-    title: 'The Quiet Case for Reading Slowly',
-    excerpt:
-      'In an age of speed-reading apps and five-minute summaries, there is something quietly radical about choosing to read a single page twice.',
-    tag: 'Culture',
-    status: 'published',
-    wordCount: 1420,
-    updatedAt: 'Apr 27, 2026',
-  },
-  {
-    id: '2',
-    title: 'What AI Gets Wrong About Creativity',
-    excerpt:
-      'Generative models can mimic surface form with uncanny precision, but creativity is not pattern-matching — it is the deliberate violation of expectation.',
-    tag: 'Technology',
-    status: 'published',
-    wordCount: 2105,
-    updatedAt: 'Apr 24, 2026',
-  },
-  {
-    id: '3',
-    title: 'On Rereading Books You No Longer Agree With',
-    excerpt:
-      'Returning to a book that shaped you, only to find you have outgrown its arguments, is one of the stranger pleasures of a reading life.',
-    tag: 'Books',
-    status: 'draft',
-    wordCount: 870,
-    updatedAt: 'Apr 22, 2026',
-  },
-  {
-    id: '4',
-    title: 'The Architecture of Attention',
-    excerpt:
-      'Every environment is an attention machine. The question is not whether your surroundings shape your focus, but whether you shaped your surroundings first.',
-    tag: 'Productivity',
-    status: 'published',
-    wordCount: 1680,
-    updatedAt: 'Apr 18, 2026',
-  },
-  {
-    id: '5',
-    title: 'Why Good Arguments Feel Uncomfortable',
-    excerpt:
-      'A truly compelling argument does not make you feel affirmed — it makes you feel slightly unsettled, like a chair with one leg a millimetre shorter than the rest.',
-    tag: 'Philosophy',
-    status: 'draft',
-    wordCount: 640,
-    updatedAt: 'Apr 15, 2026',
-  },
-  {
-    id: '6',
-    title: 'Notes on Finishing Things',
-    excerpt:
-      'Most creative problems are not problems of starting. They are problems of the long middle — the stretch where the idea has lost its novelty but has not yet become a result.',
-    tag: 'Writing',
-    status: 'draft',
-    wordCount: 310,
-    updatedAt: 'Apr 10, 2026',
-  },
-];
-
-const STATS = [
-  { label: 'Total essays', value: '12', icon: FileText },
-  { label: 'Published', value: '7', icon: BookOpen },
-  { label: 'In draft', value: '5', icon: Clock },
-  { label: 'Words written', value: '18.4k', icon: TrendingUp },
-];
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatWordCount(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 }
 
-export default function DashboardPage() {
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day:   'numeric',
+    year:  'numeric',
+  });
+}
+
+/** Map DB status → card label and CSS variant */
+function statusMeta(status: string): { label: string; isComplete: boolean } {
+  switch (status) {
+    case 'complete':    return { label: 'Complete',    isComplete: true  };
+    case 'in_progress': return { label: 'In Progress', isComplete: false };
+    case 'in_review':   return { label: 'In Review',   isComplete: false };
+    case 'submitted':   return { label: 'Submitted',   isComplete: true  };
+    case 'archived':    return { label: 'Archived',    isComplete: false };
+    default:            return { label: 'Draft',       isComplete: false };
+  }
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+export default async function DashboardPage() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) redirect('/login');
+
+  const { data: essays } = await supabase
+    .from('essays')
+    .select('id, title, subject, summary, status, word_count, essay_type, updated_at')
+    .eq('user_id', user.id)
+    .order('updated_at', { ascending: false });
+
+  const all = essays ?? [];
+
+  // ── Stats ────────────────────────────────────────────────────────────────
+  const totalWords   = all.reduce((sum, e) => sum + (e.word_count ?? 0), 0);
+  const completeCount = all.filter(e => e.status === 'complete' || e.status === 'submitted').length;
+  const activeCount   = all.filter(e => e.status === 'draft' || e.status === 'in_progress').length;
+
+  const stats = [
+    { label: 'Total essays',  value: String(all.length),            icon: FileText   },
+    { label: 'Complete',      value: String(completeCount),          icon: BookOpen   },
+    { label: 'In progress',   value: String(activeCount),            icon: Clock      },
+    { label: 'Words written', value: formatWordCount(totalWords),    icon: TrendingUp },
+  ];
+
+  // ── Recent (up to 6) ─────────────────────────────────────────────────────
+  const recent = all.slice(0, 6);
+
   return (
     <div className={styles.page}>
       {/* Page header */}
@@ -107,7 +86,7 @@ export default function DashboardPage() {
 
       {/* Stats */}
       <div className={styles.stats}>
-        {STATS.map(({ label, value }) => (
+        {stats.map(({ label, value }) => (
           <div key={label} className={styles.statCard}>
             <p className={styles.statValue}>{value}</p>
             <p className={styles.statLabel}>{label}</p>
@@ -123,38 +102,55 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      <div className={styles.grid}>
-        {DUMMY_ESSAYS.map((essay) => (
-          <Link key={essay.id} href={`/essays/${essay.id}`} className={styles.card}>
-            <div className={styles.cardTop}>
-              <span className={styles.cardTag}>{essay.tag}</span>
-              <span
-                className={[
-                  styles.cardStatus,
-                  essay.status === 'published'
-                    ? styles.statusPublished
-                    : styles.statusDraft,
-                ].join(' ')}
-              >
-                {essay.status === 'published' ? 'Published' : 'Draft'}
-              </span>
-            </div>
-
-            <h3 className={styles.cardTitle}>{essay.title}</h3>
-            <p className={styles.cardExcerpt}>{essay.excerpt}</p>
-
-            <div className={styles.cardFooter}>
-              <div className={styles.cardMeta}>
-                <span className={styles.cardMetaItem}>
-                  <FileText size={11} aria-hidden="true" />
-                  {formatWordCount(essay.wordCount)} words
-                </span>
-              </div>
-              <span className={styles.cardDate}>{essay.updatedAt}</span>
-            </div>
+      {recent.length === 0 ? (
+        <div className={styles.emptyState}>
+          <p className={styles.emptyText}>No essays yet.</p>
+          <Link href="/essays/new" className={styles.newEssayBtn}>
+            <Plus size={15} aria-hidden="true" />
+            Write your first essay
           </Link>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className={styles.grid}>
+          {recent.map((essay) => {
+            const { label: statusLabel, isComplete } = statusMeta(essay.status);
+            const tag = essay.essay_type
+              ? (ESSAY_TYPE_LABELS[essay.essay_type] ?? essay.essay_type)
+              : (essay.subject ?? null);
+
+            return (
+              <Link key={essay.id} href={`/essays/${essay.id}`} className={styles.card}>
+                <div className={styles.cardTop}>
+                  {tag && <span className={styles.cardTag}>{tag}</span>}
+                  <span
+                    className={[
+                      styles.cardStatus,
+                      isComplete ? styles.statusPublished : styles.statusDraft,
+                    ].join(' ')}
+                  >
+                    {statusLabel}
+                  </span>
+                </div>
+
+                <h3 className={styles.cardTitle}>{essay.title}</h3>
+                {essay.summary && (
+                  <p className={styles.cardExcerpt}>{essay.summary}</p>
+                )}
+
+                <div className={styles.cardFooter}>
+                  <div className={styles.cardMeta}>
+                    <span className={styles.cardMetaItem}>
+                      <FileText size={11} aria-hidden="true" />
+                      {formatWordCount(essay.word_count ?? 0)} words
+                    </span>
+                  </div>
+                  <span className={styles.cardDate}>{formatDate(essay.updated_at)}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

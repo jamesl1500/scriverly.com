@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { Check, Sparkles } from 'lucide-react';
@@ -10,8 +10,6 @@ import type { AxiosError } from 'axios';
 import {
   createEssaySchema,
   type CreateEssayValues,
-  essayStep1Schema,
-  essayStep2Schema,
   ESSAY_TYPES,
   ACADEMIC_LEVELS,
   CITATION_STYLES,
@@ -62,7 +60,7 @@ export default function EssayCreationWizard() {
     register,
     handleSubmit,
     trigger,
-    watch,
+    control,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateEssayValues>({
@@ -80,8 +78,8 @@ export default function EssayCreationWizard() {
     },
   });
 
-  const startWithOutline = watch('start_with_outline');
-  const summaryValue     = watch('summary') ?? '';
+  const startWithOutline = useWatch({ control, name: 'start_with_outline', defaultValue: false });
+  const summaryValue     = useWatch({ control, name: 'summary', defaultValue: '' }) ?? '';
 
   // ── Navigation ──────────────────────────────────────────
 

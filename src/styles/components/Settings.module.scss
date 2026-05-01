@@ -236,6 +236,47 @@
   flex-shrink: 0;
 }
 
+// ===== Inline edit panels (email / password) =====
+
+.fieldPanel {
+  padding: v.$space-5 v.$space-6;
+  border-bottom: 1px solid v.$color-border;
+  background-color: v.$color-bg-subtle;
+}
+
+.fieldPanelForm {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-4;
+  max-width: 28rem;
+}
+
+.fieldPanelActions {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+}
+
+.fieldPanelAlert {
+  font-size: v.$font-size-xs;
+  padding: v.$space-2 v.$space-3;
+  border-radius: v.$radius-md;
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+
+  &.fieldPanelSuccess {
+    background-color: v.$color-success-bg;
+    color: v.$color-success;
+    border: 1px solid v.$color-success-border;
+  }
+
+  &.fieldPanelError {
+    background-color: v.$color-error-bg;
+    color: v.$color-error;
+  }
+}
+
 // ===== Select (reused from Profile) =====
 
 .selectWrap {

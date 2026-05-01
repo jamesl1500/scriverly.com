@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useRef, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, AlertCircle, Camera } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Camera, Loader2 } from 'lucide-react';
 import type { AxiosError } from 'axios';
 
 import {
@@ -20,6 +20,7 @@ interface ProfileFormProps {
   initialValues: ProfileFormValues;
   email: string;
   role: string;
+  avatarUrl: string;
   createdAt: string;
 }
 
@@ -33,23 +34,56 @@ export default function ProfileForm({
   initialValues,
   email,
   role,
+  avatarUrl,
   createdAt,
 }: ProfileFormProps) {
   const [success, setSuccess] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [liveAvatarUrl, setLiveAvatarUrl] = useState(avatarUrl);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError(null);
+
+    const body = new FormData();
+    body.append('avatar', file);
+
+    try {
+      const res = await fetch('/api/user/avatar', { method: 'PATCH', body });
+      const json = await res.json();
+      if (!res.ok) {
+        setUploadError(json.error ?? 'Upload failed.');
+      } else {
+        // Bust the cache so the new image loads immediately
+        setLiveAvatarUrl(`${json.data.avatarUrl}?t=${Date.now()}`);
+      }
+    } catch {
+      setUploadError('Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+      // Reset so the same file can be re-selected if needed
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
 
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: initialValues,
   });
 
-  const displayName = watch('full_name') || email;
-  const bioValue = watch('bio') ?? '';
+  const displayName = useWatch({ control, name: 'full_name', defaultValue: initialValues.full_name }) || email;
+  const bioValue = useWatch({ control, name: 'bio', defaultValue: '' }) ?? '';
 
   const initials = displayName
     .split(' ')
@@ -88,17 +122,49 @@ export default function ProfileForm({
       {/* ── Left: Avatar + Identity sidebar ── */}
       <aside className={styles.avatarPanel}>
         <div className={styles.avatarWrap}>
-          <div className={styles.avatarCircle} aria-hidden="true">
-            {initials}
-          </div>
+          {liveAvatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={liveAvatarUrl}
+              alt={displayName}
+              className={styles.avatarCircle}
+            />
+          ) : (
+            <div className={styles.avatarCircle} aria-hidden="true">
+              {initials}
+            </div>
+          )}
+
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            style={{ display: 'none' }}
+            aria-hidden="true"
+            onChange={handleAvatarChange}
+          />
+
           <button
             type="button"
             className={styles.avatarChangeBtn}
             aria-label="Change profile photo"
+            disabled={uploading}
+            onClick={() => fileInputRef.current?.click()}
           >
-            <Camera size={13} aria-hidden="true" />
-            Change photo
+            {uploading ? (
+              <Loader2 size={13} className={styles.spinning} aria-hidden="true" />
+            ) : (
+              <Camera size={13} aria-hidden="true" />
+            )}
+            {uploading ? 'Uploading…' : 'Change photo'}
           </button>
+
+          {uploadError && (
+            <p className={styles.uploadError} role="alert">
+              {uploadError}
+            </p>
+          )}
         </div>
 
         <div className={styles.identityCard}>

@@ -58,6 +58,7 @@ export default function EssaySettingsModal({
 
   // ── Reset form when essay changes ────────────────────────
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSubject(essay.subject ?? '');
     setSummary(essay.summary ?? '');
     setEssayType(essay.essay_type ?? '');

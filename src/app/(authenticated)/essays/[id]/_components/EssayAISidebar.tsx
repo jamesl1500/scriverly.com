@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   X,
   Sparkles,
@@ -56,9 +56,11 @@ interface AnalysisResult {
 }
 
 interface EssayAISidebarProps {
-  essay:   Essay;
-  editor:  Editor | null;
-  onClose: () => void;
+  essay:                Essay;
+  editor:               Editor | null;
+  onClose:              () => void;
+  /** Incremented by EssayEditor after the user stops typing (debounced 5 s). */
+  autoAnalyzeTrigger?:  number;
 }
 
 // ── Apply grammar fix via ProseMirror find-and-replace ────────────────────────
@@ -232,12 +234,14 @@ function CollapsibleSection({
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export default function EssayAISidebar({ essay, editor, onClose }: EssayAISidebarProps) {
+export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrigger = 0 }: EssayAISidebarProps) {
   const [analysis,       setAnalysis]       = useState<AnalysisResult | null>(null);
   const [loading,        setLoading]        = useState(false);
   const [error,          setError]          = useState<string | null>(null);
   const [appliedGrammar, setAppliedGrammar] = useState<Set<number>>(new Set());
   const [appliedStyle,   setAppliedStyle]   = useState<Set<number>>(new Set());
+  // Track whether this is the very first mount so we don't double-call on open
+  const isFirstMount = useRef(true);
 
   const handleApplyGrammar = useCallback((index: number, original: string, suggestion: string) => {
     if (!editor) return;
@@ -275,8 +279,10 @@ export default function EssayAISidebar({ essay, editor, onClose }: EssayAISideba
   }, [essay.id]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadCached();
   }, [loadCached]);
+
 
   // ── Run analysis ────────────────────────────────────────────────────────────
 
@@ -298,6 +304,21 @@ export default function EssayAISidebar({ essay, editor, onClose }: EssayAISideba
       setLoading(false);
     }
   }, [essay.id]);
+
+  // ── React to auto-analyze trigger from editor ────────────────────────────
+
+  useEffect(() => {
+    // Skip the initial render; loadCached already handles that
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    if (autoAnalyzeTrigger === 0) return;
+    // force: false — the server uses content_hash; Claude is skipped if unchanged
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    runAnalysis(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoAnalyzeTrigger]);
 
   // ── Render ─────────────────────────────────────────────────────────────────
 

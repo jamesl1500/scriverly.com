@@ -18,11 +18,15 @@ import type { AxiosError } from 'axios';
 
 import {
   settingsSchema,
+  changeEmailSchema,
+  changePasswordSchema,
   type SettingsFormValues,
+  type ChangeEmailValues,
+  type ChangePasswordValues,
   CITATION_STYLES,
   ESSAY_TYPES,
 } from '@/libs/validations/user';
-import { Button } from '@/components/ui';
+import { Button, Input } from '@/components/ui';
 import FormField from '@/components/ui/FormField/FormField';
 import apiClient from '@/libs/apiClient';
 import type { ApiErrorResponse } from '@/libs/apiHelpers';
@@ -220,6 +224,8 @@ function AccountTab({
   email: string;
   emailVerified: boolean;
 }) {
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [editingPassword, setEditingPassword] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
 
@@ -246,58 +252,76 @@ function AccountTab({
         </div>
 
         {/* Email row */}
-        <div className={styles.fieldRow}>
-          <div className={styles.fieldInfo}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Mail size={14} aria-hidden="true" style={{ color: 'var(--color-text-muted, #9C9087)', flexShrink: 0 }} />
-              <span className={styles.fieldLabel}>Email address</span>
+        <div>
+          <div className={styles.fieldRow}>
+            <div className={styles.fieldInfo}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Mail size={14} aria-hidden="true" style={{ color: 'var(--color-text-muted, #9C9087)', flexShrink: 0 }} />
+                <span className={styles.fieldLabel}>Email address</span>
+              </div>
+              <span className={styles.fieldMeta}>{email}</span>
             </div>
-            <span className={styles.fieldMeta}>{email}</span>
+            <div className={styles.fieldActions}>
+              <span
+                className={[
+                  styles.fieldBadge,
+                  emailVerified ? styles.badgeVerified : styles.badgeUnverified,
+                ].join(' ')}
+              >
+                {emailVerified ? (
+                  <><CheckCircle2 size={11} aria-hidden="true" />Verified</>
+                ) : (
+                  <><AlertCircle size={11} aria-hidden="true" />Unverified</>
+                )}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setEditingEmail((v) => !v);
+                  setEditingPassword(false);
+                }}
+              >
+                {editingEmail ? 'Cancel' : 'Change email'}
+              </Button>
+            </div>
           </div>
-          <div className={styles.fieldActions}>
-            <span
-              className={[
-                styles.fieldBadge,
-                emailVerified ? styles.badgeVerified : styles.badgeUnverified,
-              ].join(' ')}
-            >
-              {emailVerified ? (
-                <>
-                  <CheckCircle2 size={11} aria-hidden="true" />
-                  Verified
-                </>
-              ) : (
-                <>
-                  <AlertCircle size={11} aria-hidden="true" />
-                  Unverified
-                </>
-              )}
-            </span>
-          </div>
+          {editingEmail && (
+            <ChangeEmailForm
+              currentEmail={email}
+              onDone={() => setEditingEmail(false)}
+            />
+          )}
         </div>
 
         {/* Password row */}
-        <div className={styles.fieldRow}>
-          <div className={styles.fieldInfo}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Lock size={14} aria-hidden="true" style={{ color: 'var(--color-text-muted, #9C9087)', flexShrink: 0 }} />
-              <span className={styles.fieldLabel}>Password</span>
+        <div>
+          <div className={styles.fieldRow}>
+            <div className={styles.fieldInfo}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Lock size={14} aria-hidden="true" style={{ color: 'var(--color-text-muted, #9C9087)', flexShrink: 0 }} />
+                <span className={styles.fieldLabel}>Password</span>
+              </div>
+              <span className={styles.fieldMeta}>
+                Update the password used to sign in.
+              </span>
             </div>
-            <span className={styles.fieldMeta}>
-              Send a reset link to change your password.
-            </span>
+            <div className={styles.fieldActions}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setEditingPassword((v) => !v);
+                  setEditingEmail(false);
+                }}
+              >
+                {editingPassword ? 'Cancel' : 'Change password'}
+              </Button>
+            </div>
           </div>
-          <div className={styles.fieldActions}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                void apiClient.post('/auth/forgot-password', { email });
-              }}
-            >
-              Change password
-            </Button>
-          </div>
+          {editingPassword && (
+            <ChangePasswordForm onDone={() => setEditingPassword(false)} />
+          )}
         </div>
 
         {/* Sessions row */}
@@ -329,6 +353,217 @@ function AccountTab({
         </div>
       </div>
     </>
+  );
+}
+
+// ──────────────────────────────────────────
+// Change Email inline form
+// ──────────────────────────────────────────
+
+function ChangeEmailForm({
+  currentEmail,
+  onDone,
+}: {
+  currentEmail: string;
+  onDone: () => void;
+}) {
+  const [success, setSuccess] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ChangeEmailValues>({
+    resolver: zodResolver(changeEmailSchema),
+  });
+
+  async function onSubmit(values: ChangeEmailValues) {
+    setServerError(null);
+    setSuccess(false);
+    try {
+      await apiClient.post('/user/change-email', values);
+      setSuccess(true);
+    } catch (err) {
+      const axiosErr = err as AxiosError<ApiErrorResponse>;
+      setServerError(
+        axiosErr?.response?.data?.error ?? 'Something went wrong. Please try again.',
+      );
+    }
+  }
+
+  if (success) {
+    return (
+      <div className={styles.fieldPanel}>
+        <div className={`${styles.fieldPanelAlert} ${styles.fieldPanelSuccess}`}>
+          <CheckCircle2 size={14} aria-hidden="true" />
+          Confirmation sent to your new address. Click the link to complete the change.
+        </div>
+        <div style={{ marginTop: '0.75rem' }}>
+          <Button variant="ghost" size="sm" onClick={onDone}>
+            Done
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.fieldPanel}>
+      <form
+        className={styles.fieldPanelForm}
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+      >
+        {serverError && (
+          <div className={`${styles.fieldPanelAlert} ${styles.fieldPanelError}`} role="alert">
+            <AlertCircle size={14} aria-hidden="true" />
+            {serverError}
+          </div>
+        )}
+
+        <FormField
+          label="New email address"
+          htmlFor="newEmail"
+          error={errors.newEmail?.message}
+          hint={`Currently: ${currentEmail}`}
+        >
+          <Input
+            id="newEmail"
+            type="email"
+            autoComplete="email"
+            placeholder="new@example.com"
+            hasError={!!errors.newEmail}
+            {...register('newEmail')}
+          />
+        </FormField>
+
+        <div className={styles.fieldPanelActions}>
+          <Button type="submit" size="sm" isLoading={isSubmitting}>
+            Send confirmation
+          </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={onDone}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────
+// Change Password inline form
+// ──────────────────────────────────────────
+
+function ChangePasswordForm({ onDone }: { onDone: () => void }) {
+  const [success, setSuccess] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ChangePasswordValues>({
+    resolver: zodResolver(changePasswordSchema),
+  });
+
+  async function onSubmit(values: ChangePasswordValues) {
+    setServerError(null);
+    setSuccess(false);
+    try {
+      await apiClient.post('/user/change-password', values);
+      setSuccess(true);
+    } catch (err) {
+      const axiosErr = err as AxiosError<ApiErrorResponse>;
+      setServerError(
+        axiosErr?.response?.data?.error ?? 'Something went wrong. Please try again.',
+      );
+    }
+  }
+
+  if (success) {
+    return (
+      <div className={styles.fieldPanel}>
+        <div className={`${styles.fieldPanelAlert} ${styles.fieldPanelSuccess}`}>
+          <CheckCircle2 size={14} aria-hidden="true" />
+          Password updated. Other active sessions have been signed out.
+        </div>
+        <div style={{ marginTop: '0.75rem' }}>
+          <Button variant="ghost" size="sm" onClick={onDone}>
+            Done
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.fieldPanel}>
+      <form
+        className={styles.fieldPanelForm}
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+      >
+        {serverError && (
+          <div className={`${styles.fieldPanelAlert} ${styles.fieldPanelError}`} role="alert">
+            <AlertCircle size={14} aria-hidden="true" />
+            {serverError}
+          </div>
+        )}
+
+        <FormField
+          label="Current password"
+          htmlFor="currentPassword"
+          error={errors.currentPassword?.message}
+        >
+          <Input
+            id="currentPassword"
+            type="password"
+            autoComplete="current-password"
+            hasError={!!errors.currentPassword}
+            {...register('currentPassword')}
+          />
+        </FormField>
+
+        <FormField
+          label="New password"
+          htmlFor="newPassword"
+          error={errors.newPassword?.message}
+          hint="At least 8 characters."
+        >
+          <Input
+            id="newPassword"
+            type="password"
+            autoComplete="new-password"
+            hasError={!!errors.newPassword}
+            {...register('newPassword')}
+          />
+        </FormField>
+
+        <FormField
+          label="Confirm new password"
+          htmlFor="confirmPassword"
+          error={errors.confirmPassword?.message}
+        >
+          <Input
+            id="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            hasError={!!errors.confirmPassword}
+            {...register('confirmPassword')}
+          />
+        </FormField>
+
+        <div className={styles.fieldPanelActions}>
+          <Button type="submit" size="sm" isLoading={isSubmitting}>
+            Update password
+          </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={onDone}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
 

@@ -3,7 +3,6 @@ import { createSupabaseServerClient } from '@/libs/supabase/server';
 import { successResponse, errorResponse } from '@/libs/apiHelpers';
 import { ZodError } from 'zod';
 import { onboardingProfileSchema } from '@/libs/validations/onboarding';
-import { on } from 'events';
 
 export async function PATCH(request: NextRequest) {
   try {

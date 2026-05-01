@@ -159,6 +159,8 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
   const [outlineOpen,  setOutlineOpen]  = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [localEssay, setLocalEssay] = useState<Essay>(essay);
+  // Incremented whenever the debounce fires to signal the sidebar to re-analyze
+  const [autoAnalyzeTrigger, setAutoAnalyzeTrigger] = useState(0);
 
   const handleSettingsSaved = useCallback(
     (updates: Partial<Essay>) => setLocalEssay(prev => ({ ...prev, ...updates })),
@@ -167,6 +169,20 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
 
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const analyzeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestWordCountRef = useRef(essay.word_count);
+
+  // ── Auto-analyze debounce ──────────────────────────────
+
+  const scheduleAutoAnalyze = useCallback((count: number) => {
+    latestWordCountRef.current = count;
+    if (analyzeTimeout.current) clearTimeout(analyzeTimeout.current);
+    if (count < 30) return; // not enough content to analyze
+    analyzeTimeout.current = setTimeout(() => {
+      setSidebarOpen(true);
+      setAutoAnalyzeTrigger(n => n + 1);
+    }, 5000); // 5-second idle delay
+  }, []);
 
   // ── Auto-save content ──────────────────────────────────
 
@@ -236,6 +252,7 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
       const count = countWords(text);
       setWordCount(count);
       scheduleContentSave(e.getJSON() as Record<string, unknown>, count);
+      scheduleAutoAnalyze(count);
     },
     immediatelyRender: false,
   });
@@ -246,6 +263,7 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
       if (titleTimeout.current) clearTimeout(titleTimeout.current);
+      if (analyzeTimeout.current) clearTimeout(analyzeTimeout.current);
     };
   }, []);
 
@@ -530,6 +548,7 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
             essay={localEssay}
             editor={editor}
             onClose={() => setSidebarOpen(false)}
+            autoAnalyzeTrigger={autoAnalyzeTrigger}
           />
         )}
       </div>
