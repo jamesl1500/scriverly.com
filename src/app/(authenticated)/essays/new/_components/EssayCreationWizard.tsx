@@ -53,8 +53,9 @@ const STEP_FIELDS: Record<number, (keyof CreateEssayValues)[]> = {
 
 export default function EssayCreationWizard() {
   const router = useRouter();
-  const [step, setStep]               = useState(1);
+  const [step, setStep] = useState(1);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const {
     register,
@@ -66,30 +67,36 @@ export default function EssayCreationWizard() {
   } = useForm<CreateEssayValues>({
     resolver: zodResolver(createEssaySchema),
     defaultValues: {
-      title:              '',
-      subject:            '',
-      summary:            '',
-      essay_type:         'argumentative',
-      academic_level:     'undergraduate',
-      citation_style:     'APA',
-      word_goal:          undefined,
-      due_date:           '',
+      title: '',
+      subject: '',
+      summary: '',
+      essay_type: 'argumentative',
+      academic_level: 'undergraduate',
+      citation_style: 'APA',
+      word_goal: undefined,
+      due_date: '',
       start_with_outline: false,
     },
   });
 
   const startWithOutline = useWatch({ control, name: 'start_with_outline', defaultValue: false });
-  const summaryValue     = useWatch({ control, name: 'summary', defaultValue: '' }) ?? '';
+  const summaryValue = useWatch({ control, name: 'summary', defaultValue: '' }) ?? '';
 
   // ── Navigation ──────────────────────────────────────────
 
   async function handleNext() {
-    const fields = STEP_FIELDS[step];
-    if (fields) {
-      const valid = await trigger(fields);
-      if (!valid) return;
+    if (isNavigating) return;
+    setIsNavigating(true);
+    try {
+      const fields = STEP_FIELDS[step];
+      if (fields) {
+        const valid = await trigger(fields);
+        if (!valid) return;
+      }
+      setStep(s => s + 1);
+    } finally {
+      setIsNavigating(false);
     }
-    setStep(s => s + 1);
   }
 
   function handleBack() {
@@ -105,7 +112,19 @@ export default function EssayCreationWizard() {
       const { data } = await apiClient.post('/essays', values);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const essay = (data as any).data?.essay;
-      router.push(`/essays/${essay.id as string}`);
+      const essayId = essay.id as string;
+
+      // If the user requested an outline, kick off generation before navigating.
+      // We fire-and-forget any error — the outline panel has its own generate button as fallback.
+      if (values.start_with_outline) {
+        try {
+          await apiClient.post(`/essays/${essayId}/outline`);
+        } catch {
+          // Non-critical — user can regenerate from the outline panel
+        }
+      }
+
+      router.push(`/essays/${essayId}`);
     } catch (err) {
       const axiosErr = err as AxiosError<ApiErrorResponse>;
       setServerError(
@@ -123,7 +142,7 @@ export default function EssayCreationWizard() {
         {/* ── Step Indicator ────────────────────────── */}
         <div className={styles.stepIndicator} role="list" aria-label="Progress">
           {STEPS.map((s, idx) => {
-            const isDone   = step > s.id;
+            const isDone = step > s.id;
             const isActive = step === s.id;
             return (
               <div
@@ -158,7 +177,7 @@ export default function EssayCreationWizard() {
         </div>
 
         {/* ── Step Body ─────────────────────────────── */}
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form id="essay-form" onSubmit={handleSubmit(onSubmit)} noValidate>
 
           {/* Step 1 — Details */}
           {step === 1 && (
@@ -345,39 +364,40 @@ export default function EssayCreationWizard() {
             </div>
           )}
 
-          {/* ── Navigation Footer ─────────────────── */}
-          <div className={styles.wizardFooter}>
-            <div>
-              {step > 1 ? (
-                <Button type="button" variant="ghost" size="md" onClick={handleBack}>
-                  Back
-                </Button>
-              ) : (
-                <span /> // spacer
-              )}
-            </div>
+        </form>
 
-            <div className={styles.wizardFooterRight}>
-              <span className={styles.stepCounter}>Step {step} of {STEPS.length}</span>
-
-              {step < STEPS.length ? (
-                <Button type="button" size="md" onClick={handleNext}>
-                  Continue
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  size="md"
-                  isLoading={isSubmitting}
-                  leftIcon={<Sparkles size={15} aria-hidden="true" />}
-                >
-                  Create essay
-                </Button>
-              )}
-            </div>
+        {/* ── Navigation Footer ─────────────────── */}
+        <div className={styles.wizardFooter}>
+          <div>
+            {step > 1 ? (
+              <Button type="button" variant="ghost" size="md" onClick={handleBack}>
+                Back
+              </Button>
+            ) : (
+              <span /> // spacer
+            )}
           </div>
 
-        </form>
+          <div className={styles.wizardFooterRight}>
+            <span className={styles.stepCounter}>Step {step} of {STEPS.length}</span>
+
+            {step < STEPS.length ? (
+              <Button type="button" size="md" onClick={handleNext} disabled={isNavigating}>
+                Continue
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="md"
+                isLoading={isSubmitting}
+                onClick={handleSubmit(onSubmit)}
+                leftIcon={<Sparkles size={15} aria-hidden="true" />}
+              >
+                Create essay
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@
  * @version 1.0.0
  */
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 export async function createSupabaseServerClient() {
@@ -37,5 +38,21 @@ export async function createSupabaseServerClient() {
         },
       },
     },
+  );
+}
+
+/**
+ * Service-role client — bypasses RLS.
+ * Use ONLY in trusted server contexts (webhooks, cron jobs, migrations).
+ * Never expose to the client or use in user-facing API routes.
+ */
+export function createSupabaseServiceClient() {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set.');
+  }
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } },
   );
 }

@@ -1,8 +1,9 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import crypto from 'crypto';
 import { createSupabaseServerClient } from '@/libs/supabase/server';
 import { successResponse, errorResponse } from '@/libs/apiHelpers';
+import { checkAndIncrementQuota } from '@/libs/aiQuota';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -63,6 +64,21 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     if (userError || !user) {
       return errorResponse('Unauthorized', 401, 'unauthorized');
+    }
+
+    // ── Quota check ──────────────────────────────────────────────────────────
+    const quota = await checkAndIncrementQuota(supabase, user.id, 'analysis');
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `You've used all ${quota.limit} AI analyses for this month. Upgrade to Premium for unlimited access.`,
+          code:  'quota_exceeded',
+          used:  quota.used,
+          limit: quota.limit,
+        },
+        { status: 402 },
+      );
     }
 
     // Fetch the essay

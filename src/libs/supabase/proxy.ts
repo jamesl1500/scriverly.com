@@ -49,6 +49,7 @@ export async function updateSession(request: NextRequest) {
     '/reset_password',
     '/verify-email',
     '/api/auth',
+    '/api/billing/webhook',
   ];
 
   const isPublic =

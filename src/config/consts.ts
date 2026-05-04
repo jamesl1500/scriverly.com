@@ -19,3 +19,7 @@ export const CHARS_PER_PAGE = WORDS_PER_PAGE * 5.5  // avg chars/word
 export const AUTOSAVE_DEBOUNCE_MS = 1500
 export const SUGGESTION_DEBOUNCE_MS = 2000
 export const SNAPSHOT_EVERY_N_SAVES = 10
+
+// ── AI quota limits (free tier) ───────────────────────────────────────────────
+export const FREE_ANALYSIS_LIMIT = 5   // analyses per calendar month
+export const FREE_OUTLINE_LIMIT  = 3   // outline generations per calendar month

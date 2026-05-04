@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseServerClient } from '@/libs/supabase/server';
 import Logo from '@/components/ui/Logo/Logo';
+import QueryProvider from '@/components/QueryProvider';
 import AppNav from './_components/AppNav';
 import styles from '@/styles/layouts/app-layout.module.scss';
 
@@ -29,6 +30,7 @@ export default async function AuthenticatedLayout({
   const avatarUrl = profile?.avatar_url ?? '';
 
   return (
+    <QueryProvider>
     <div className={styles.shell}>
       <AppNav user={{ fullName, avatarUrl }} />
 
@@ -93,5 +95,6 @@ export default async function AuthenticatedLayout({
         </div>
       </footer>
     </div>
+    </QueryProvider>
   );
 }

@@ -17,6 +17,7 @@ import type { AxiosError } from 'axios';
 
 import type { Essay } from '@/libs/validations/essay';
 import apiClient from '@/libs/apiClient';
+import UpgradeModal from '@/components/UpgradeModal';
 import styles from '@/styles/components/EssayAISidebar.module.scss';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -240,6 +241,7 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
   const [error,          setError]          = useState<string | null>(null);
   const [appliedGrammar, setAppliedGrammar] = useState<Set<number>>(new Set());
   const [appliedStyle,   setAppliedStyle]   = useState<Set<number>>(new Set());
+  const [upgradeModal,   setUpgradeModal]   = useState<{ used: number; limit: number } | null>(null);
   // Track whether this is the very first mount so we don't double-call on open
   const isFirstMount = useRef(true);
 
@@ -296,11 +298,20 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
       }>(`/essays/${essay.id}/analyze`, { force });
       setAnalysis(res.data.data.analysis);
     } catch (err) {
-      const msg =
-        (err as AxiosError<{ error: string }>)?.response?.data?.error ??
-        'Analysis failed. Please try again.';
+      const axiosErr = err as AxiosError<{ error: string; code?: string; used?: number; limit?: number }>;
+      if (axiosErr?.response?.status === 402 && axiosErr.response.data.code === 'quota_exceeded') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setUpgradeModal({
+          used:  axiosErr.response.data.used  ?? 5,
+          limit: axiosErr.response.data.limit ?? 5,
+        });
+        return;
+      }
+      const msg = axiosErr?.response?.data?.error ?? 'Analysis failed. Please try again.';
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError(msg);
     } finally {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
     }
   }, [essay.id]);
@@ -337,7 +348,16 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
   const otherRecs = analysis?.style_recommendations.filter(r => r.severity !== 'high') ?? [];
 
   return (
-    <aside className={styles.sidebar} aria-label="Analysis">
+    <>
+      {upgradeModal && (
+        <UpgradeModal
+          feature="analysis"
+          used={upgradeModal.used}
+          limit={upgradeModal.limit}
+          onClose={() => setUpgradeModal(null)}
+        />
+      )}
+      <aside className={styles.sidebar} aria-label="Analysis">
 
       {/* ─── Header ────────────────────────────────────────────── */}
       <header className={styles.header}>
@@ -592,5 +612,6 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
         )}
       </div>
     </aside>
+    </>
   );
 }

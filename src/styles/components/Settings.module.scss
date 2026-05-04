@@ -415,3 +415,129 @@
     border: 1px solid v.$color-error-border;
   }
 }
+
+// ── Billing Tab ───────────────────────────────────────────────────────────────
+
+.muted {
+  font-size: 0.8125rem;
+  color: v.$color-text-muted;
+}
+
+.billingPlanRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.billingPlanBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  white-space: nowrap;
+
+  &[data-premium='false'] {
+    background: v.$color-bg-subtle;
+    color: v.$color-text-secondary;
+    border: 1px solid v.$color-border;
+  }
+
+  &[data-premium='true'] {
+    background: v.$color-accent-light;
+    color: v.$color-accent-dark;
+    border: 1px solid v.$color-border-focus;
+  }
+}
+
+.billingPlanDesc {
+  font-size: 0.8125rem;
+  color: v.$color-text-secondary;
+}
+
+.billingUsageBlock {
+  background: v.$color-bg-subtle;
+  border: 1px solid v.$color-border;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.billingUsageTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: v.$color-text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.75rem;
+}
+
+.billingUsageRow {
+  & + & {
+    margin-top: 0.875rem;
+  }
+}
+
+.billingUsageLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: v.$color-text-secondary;
+  margin-bottom: 0.375rem;
+}
+
+.billingUsageTrack {
+  height: 6px;
+  background: v.$color-border;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.billingUsageFill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+.billingUpgradeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: v.$color-accent;
+  color: v.$color-text-inverse;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: v.$color-accent-dark;
+  }
+}
+
+.billingPortalBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: v.$color-bg-subtle;
+  color: v.$color-text-primary;
+  border: 1px solid v.$color-border;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: v.$color-bg-hover;
+    border-color: v.$color-border-strong;
+  }
+}
+

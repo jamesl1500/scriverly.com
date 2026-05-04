@@ -156,7 +156,7 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
   const [wordCount, setWordCount] = useState(essay.word_count);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [sidebarOpen,  setSidebarOpen]  = useState(false);
-  const [outlineOpen,  setOutlineOpen]  = useState(false);
+  const [outlineOpen,  setOutlineOpen]  = useState(essay.start_with_outline === true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [localEssay, setLocalEssay] = useState<Essay>(essay);
   // Incremented whenever the debounce fires to signal the sidebar to re-analyze
@@ -171,17 +171,21 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
   const titleTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const analyzeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestWordCountRef = useRef(essay.word_count);
+  // Tracks doc block count to detect paragraph completion
+  const lastBlockCountRef = useRef<number | null>(null);
 
   // ── Auto-analyze debounce ──────────────────────────────
 
-  const scheduleAutoAnalyze = useCallback((count: number) => {
+  const scheduleAutoAnalyze = useCallback((count: number, immediate = false) => {
     latestWordCountRef.current = count;
     if (analyzeTimeout.current) clearTimeout(analyzeTimeout.current);
     if (count < 30) return; // not enough content to analyze
+    // Paragraph-end: short 500 ms delay; regular typing: 5 s idle delay
+    const delay = immediate ? 500 : 5000;
     analyzeTimeout.current = setTimeout(() => {
       setSidebarOpen(true);
       setAutoAnalyzeTrigger(n => n + 1);
-    }, 5000); // 5-second idle delay
+    }, delay);
   }, []);
 
   // ── Auto-save content ──────────────────────────────────
@@ -252,7 +256,13 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
       const count = countWords(text);
       setWordCount(count);
       scheduleContentSave(e.getJSON() as Record<string, unknown>, count);
-      scheduleAutoAnalyze(count);
+      // Detect paragraph completion: block count just increased
+      const newBlockCount = e.state.doc.childCount;
+      const paragraphEnded =
+        lastBlockCountRef.current !== null &&
+        newBlockCount > lastBlockCountRef.current;
+      lastBlockCountRef.current = newBlockCount;
+      scheduleAutoAnalyze(count, paragraphEnded);
     },
     immediatelyRender: false,
   });
@@ -524,20 +534,6 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
 
         <div className={styles.editorBody}>
           <div className={styles.editorContent}>
-
-            {/* AI Outline placeholder (shown when start_with_outline=true and no content yet) */}
-            {essay.start_with_outline && !essay.outline && (
-              <div className={styles.outlinePlaceholder}>
-                <div className={styles.outlinePlaceholderIcon} aria-hidden="true">
-                  <Sparkles size={22} />
-                </div>
-                <p className={styles.outlinePlaceholderTitle}>AI outline coming soon</p>
-                <p className={styles.outlinePlaceholderDesc}>
-                  Scriverly will generate a structured outline here based on your topic, essay type, and academic level. You can start writing below in the meantime.
-                </p>
-              </div>
-            )}
-
             <EditorContent editor={editor} />
           </div>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -13,6 +14,9 @@ import {
   Lock,
   MonitorX,
   TriangleAlert,
+  CreditCard,
+  Sparkles,
+  Zap,
 } from 'lucide-react';
 import type { AxiosError } from 'axios';
 
@@ -30,28 +34,43 @@ import { Button, Input } from '@/components/ui';
 import FormField from '@/components/ui/FormField/FormField';
 import apiClient from '@/libs/apiClient';
 import type { ApiErrorResponse } from '@/libs/apiHelpers';
+import { useCurrentPlan } from '@/libs/hooks/useCurrentPlan';
 import styles from '@/styles/components/Settings.module.scss';
 
-type TabId = 'preferences' | 'account' | 'danger';
+type TabId = 'preferences' | 'account' | 'billing' | 'danger';
 
 interface SettingsContentProps {
   email: string;
   emailVerified: boolean;
   initialValues: SettingsFormValues;
+  billingStatus?: 'success' | 'cancelled';
 }
 
 const TABS: { id: TabId; label: string; icon: React.ComponentType<{ size?: number; 'aria-hidden'?: boolean | 'true' | 'false' }> }[] = [
   { id: 'preferences', label: 'Preferences', icon: Sliders },
-  { id: 'account', label: 'Account', icon: UserCog },
-  { id: 'danger', label: 'Danger zone', icon: ShieldAlert },
+  { id: 'account',     label: 'Account',     icon: UserCog },
+  { id: 'billing',     label: 'Billing',     icon: CreditCard },
+  { id: 'danger',      label: 'Danger zone', icon: ShieldAlert },
 ];
 
 export default function SettingsContent({
   email,
   emailVerified,
   initialValues,
+  billingStatus,
 }: SettingsContentProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('preferences');
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<TabId>(
+    billingStatus ? 'billing' : 'preferences',
+  );
+
+  // Clean the ?billing= param from the URL after mount
+  useEffect(() => {
+    if (billingStatus) {
+      router.replace('/settings', { scroll: false });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className={styles.settingsGrid}>
@@ -85,6 +104,7 @@ export default function SettingsContent({
         {activeTab === 'account' && (
           <AccountTab email={email} emailVerified={emailVerified} />
         )}
+        {activeTab === 'billing' && <BillingTab billingStatus={billingStatus} />}
         {activeTab === 'danger' && <DangerTab />}
       </div>
     </div>
@@ -628,6 +648,124 @@ function DangerTab() {
           support@scriverly.com
         </a>{' '}
         to request removal.
+      </div>
+    </>
+  );
+}
+
+// ──────────────────────────────────────────
+// Billing Tab
+// ──────────────────────────────────────────
+
+function UsageBar({ label, used, limit }: { label: string; used: number; limit: number | null }) {
+  const pct = limit ? Math.min(100, (used / limit) * 100) : 0;
+  const atLimit = limit !== null && used >= limit;
+  return (
+    <div className={styles.billingUsageRow}>
+      <div className={styles.billingUsageLabels}>
+        <span>{label}</span>
+        <span style={{ color: atLimit ? '#D44949' : undefined }}>
+          {limit === null ? 'Unlimited' : `${used} / ${limit}`}
+        </span>
+      </div>
+      {limit !== null && (
+        <div className={styles.billingUsageTrack}>
+          <div
+            className={styles.billingUsageFill}
+            style={{
+              width: `${pct}%`,
+              backgroundColor: atLimit ? '#D44949' : '#C8854A',
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BillingTab({ billingStatus }: { billingStatus?: 'success' | 'cancelled' }) {
+  const { data: plan, isLoading } = useCurrentPlan();
+  const isPremium = plan?.plan === 'premium';
+
+  return (
+    <>
+      {billingStatus === 'success' && (
+        <div className={`${styles.alert} ${styles.alertSuccess}`} role="status" aria-live="polite">
+          <CheckCircle2 size={15} aria-hidden="true" />
+          You&apos;re now on Premium! Enjoy unlimited AI analyses and outline generations.
+        </div>
+      )}
+      {billingStatus === 'cancelled' && (
+        <div className={`${styles.alert} ${styles.alertError}`} role="status" aria-live="polite">
+          <AlertCircle size={15} aria-hidden="true" />
+          Checkout was cancelled — you haven&apos;t been charged.
+        </div>
+      )}
+      <div className={styles.section}>
+        <div className={styles.sectionHead}>
+          <h2 className={styles.sectionTitle}>Subscription</h2>
+          <p className={styles.sectionDesc}>Manage your plan and AI usage.</p>
+        </div>
+
+        <div className={styles.sectionBody}>
+          {isLoading && <p className={styles.muted}>Loading…</p>}
+
+          {!isLoading && plan && (
+            <>
+              {/* Plan badge */}
+              <div className={styles.billingPlanRow}>
+                <div className={styles.billingPlanBadge} data-premium={isPremium}>
+                  {isPremium ? (
+                    <><Sparkles size={13} aria-hidden="true" /> Premium</>
+                  ) : (
+                    <><Zap size={13} aria-hidden="true" /> Free</>
+                  )}
+                </div>
+                <span className={styles.billingPlanDesc}>
+                  {isPremium
+                    ? 'Unlimited AI analyses and outline generations.'
+                    : 'Limited AI usage — resets each calendar month.'}
+                </span>
+              </div>
+
+              {/* Usage this month */}
+              {!isPremium && (
+                <div className={styles.billingUsageBlock}>
+                  <p className={styles.billingUsageTitle}>This month&apos;s usage</p>
+                  <UsageBar
+                    label="AI analyses"
+                    used={plan.analysis.used}
+                    limit={plan.analysis.limit}
+                  />
+                  <UsageBar
+                    label="Outline generations"
+                    used={plan.outline.used}
+                    limit={plan.outline.limit}
+                  />
+                </div>
+              )}
+
+              {/* CTA */}
+              {!isPremium && (
+                <form method="POST" action="/api/billing/checkout">
+                  <button type="submit" className={styles.billingUpgradeBtn}>
+                    <Sparkles size={14} aria-hidden="true" />
+                    Upgrade to Premium — $9/mo
+                  </button>
+                </form>
+              )}
+
+              {isPremium && (
+                <form method="POST" action="/api/billing/portal">
+                  <button type="submit" className={styles.billingPortalBtn}>
+                    <CreditCard size={14} aria-hidden="true" />
+                    Manage subscription
+                  </button>
+                </form>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </>
   );

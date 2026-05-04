@@ -6,7 +6,11 @@ import styles from '@/styles/components/Settings.module.scss';
 
 export const metadata = { title: 'Settings — Scriverly' };
 
-export default async function SettingsPage() {
+interface PageProps {
+  searchParams: Promise<{ billing?: string }>;
+}
+
+export default async function SettingsPage({ searchParams }: PageProps) {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -25,6 +29,8 @@ export default async function SettingsPage() {
     default_essay_type: profile?.default_essay_type ?? 'argumentative',
   };
 
+  const { billing } = await searchParams;
+
   return (
     <div className={styles.page}>
       <header className={styles.pageHeader}>
@@ -38,6 +44,7 @@ export default async function SettingsPage() {
         email={user.email ?? ''}
         emailVerified={!!user.email_confirmed_at}
         initialValues={initialValues}
+        billingStatus={billing === 'success' ? 'success' : billing === 'cancelled' ? 'cancelled' : undefined}
       />
     </div>
   );

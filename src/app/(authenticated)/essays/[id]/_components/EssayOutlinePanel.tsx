@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   X,
   Sparkles,
@@ -14,6 +15,7 @@ import {
 
 import type { Essay } from '@/libs/validations/essay';
 import apiClient from '@/libs/apiClient';
+import UpgradeModal from '@/components/UpgradeModal';
 import styles from '@/styles/components/EssayOutlinePanel.module.scss';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -107,14 +109,78 @@ function SectionBlock({
 // ── Main Component ──────────────────────────────────────────────────────────────
 
 export default function EssayOutlinePanel({ essay, onClose }: EssayOutlinePanelProps) {
-  const [items,      setItems]      = useState<OutlineItem[]>([]);
-  const [loading,    setLoading]    = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [error,      setError]      = useState<string | null>(null);
+  const qc = useQueryClient();
+  const queryKey = ['outline', essay.id];
+  const [upgradeModal, setUpgradeModal] = useState<{ used: number; limit: number } | null>(null);
 
-  // ── Group items by section ───────────────────────────────────────────────
+  // ── Fetch — cached, won't re-request while data is fresh ────────────────
 
-  const grouped = SECTION_ORDER.reduce<Record<OutlineSection, OutlineItem[]>>(
+  const { data: items = [], isLoading, error: fetchError } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const res = await apiClient.get<{ success: true; data: { items: OutlineItem[] } }>(
+        `/essays/${essay.id}/outline`,
+      );
+      return res.data.data.items;
+    },
+    staleTime: 5 * 60 * 1000, // 5 min — panel open/close won't re-fetch
+  });
+
+  // ── Generate / Regenerate ────────────────────────────────────────────────
+
+  const [generateError, setGenerateError] = useState<string | null>(null);
+
+  const generateMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiClient.post<{ success: true; data: { items: OutlineItem[] } }>(
+        `/essays/${essay.id}/outline`,
+      );
+      return res.data.data.items;
+    },
+    onSuccess: (newItems) => {
+      qc.setQueryData(queryKey, newItems);
+      setGenerateError(null);
+    },
+    onError: (err) => {
+      const axiosErr = err as import('axios').AxiosError<{ error: string; code?: string; used?: number; limit?: number }>;
+      if (axiosErr?.response?.status === 402 && axiosErr.response.data.code === 'quota_exceeded') {
+        setUpgradeModal({
+          used:  axiosErr.response.data.used  ?? 3,
+          limit: axiosErr.response.data.limit ?? 3,
+        });
+        return;
+      }
+      setGenerateError('Failed to generate outline. Please try again.');
+    },
+  });
+
+  // ── Toggle completion (optimistic) ──────────────────────────────────────
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({ itemId, is_complete }: { itemId: string; is_complete: boolean }) => {
+      await apiClient.patch(`/essays/${essay.id}/outline`, { itemId, is_complete });
+    },
+    onMutate: async ({ itemId, is_complete }) => {
+      await qc.cancelQueries({ queryKey });
+      const previous = qc.getQueryData<OutlineItem[]>(queryKey);
+      qc.setQueryData<OutlineItem[]>(queryKey, (old = []) =>
+        old.map(i => (i.id === itemId ? { ...i, is_complete } : i)),
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) qc.setQueryData(queryKey, context.previous);
+    },
+  });
+
+  // ── Derived ──────────────────────────────────────────────────────────────
+
+  const hasOutline = items.length > 0;
+  const generating = generateMutation.isPending;
+
+  const grouped = (['introduction', 'body', 'conclusion'] as OutlineSection[]).reduce<
+    Record<OutlineSection, OutlineItem[]>
+  >(
     (acc, s) => {
       acc[s] = items.filter(i => i.section === s).sort((a, b) => a.position - b.position);
       return acc;
@@ -122,70 +188,19 @@ export default function EssayOutlinePanel({ essay, onClose }: EssayOutlinePanelP
     { introduction: [], body: [], conclusion: [] },
   );
 
-  const hasOutline = items.length > 0;
-
-  // ── Fetch existing outline on mount ─────────────────────────────────────
-
-  useEffect(() => {
-    let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLoading(true);
-    apiClient
-      .get<{ success: true; data: { items: OutlineItem[] } }>(`/essays/${essay.id}/outline`)
-      .then(res => {
-        if (!cancelled) setItems(res.data.data.items);
-      })
-      .catch(() => {
-        // Non-critical — no outline yet
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [essay.id]);
-
-  // ── Generate outline ─────────────────────────────────────────────────────
-
-  const generate = useCallback(async () => {
-    setGenerating(true);
-    setError(null);
-    try {
-      const res = await apiClient.post<{
-        success: true;
-        data: { items: OutlineItem[] };
-      }>(`/essays/${essay.id}/outline`);
-      setItems(res.data.data.items);
-    } catch {
-      setError('Failed to generate outline. Please try again.');
-    } finally {
-      setGenerating(false);
-    }
-  }, [essay.id]);
-
-  // ── Toggle completion ────────────────────────────────────────────────────
-
-  const handleToggle = useCallback(async (itemId: string, current: boolean) => {
-    // Optimistic update
-    setItems(prev =>
-      prev.map(i => (i.id === itemId ? { ...i, is_complete: !current } : i)),
-    );
-    try {
-      await apiClient.patch(`/essays/${essay.id}/outline`, {
-        itemId,
-        is_complete: !current,
-      });
-    } catch {
-      // Revert on failure
-      setItems(prev =>
-        prev.map(i => (i.id === itemId ? { ...i, is_complete: current } : i)),
-      );
-    }
-  }, [essay.id]);
-
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <aside className={styles.panel} aria-label="Essay outline">
+    <>
+      {upgradeModal && (
+        <UpgradeModal
+          feature="outline"
+          used={upgradeModal.used}
+          limit={upgradeModal.limit}
+          onClose={() => setUpgradeModal(null)}
+        />
+      )}
+      <aside className={styles.panel} aria-label="Essay outline">
 
       {/* Header */}
       <header className={styles.header}>
@@ -198,7 +213,7 @@ export default function EssayOutlinePanel({ essay, onClose }: EssayOutlinePanelP
             <button
               type="button"
               className={styles.regenBtn}
-              onClick={generate}
+              onClick={() => generateMutation.mutate()}
               disabled={generating}
               aria-label="Regenerate outline"
               title="Regenerate outline"
@@ -220,20 +235,25 @@ export default function EssayOutlinePanel({ essay, onClose }: EssayOutlinePanelP
       {/* Body */}
       <div className={styles.body}>
 
-        {/* Loading */}
-        {loading && (
+        {/* Loading (first fetch only) */}
+        {isLoading && (
           <div className={styles.emptyState}>
             <p className={styles.emptyText}>Loading…</p>
           </div>
         )}
 
-        {/* Error */}
-        {!loading && error && (
-          <p className={styles.errorMsg} role="alert">{error}</p>
+        {/* Fetch error */}
+        {!isLoading && fetchError && (
+          <p className={styles.errorMsg} role="alert">Failed to load outline.</p>
+        )}
+
+        {/* Generate error */}
+        {!isLoading && generateError && (
+          <p className={styles.errorMsg} role="alert">{generateError}</p>
         )}
 
         {/* Empty state — no outline yet */}
-        {!loading && !hasOutline && !generating && (
+        {!isLoading && !hasOutline && !generating && (
           <div className={styles.emptyState}>
             <Sparkles size={20} className={styles.emptyIcon} aria-hidden="true" />
             <p className={styles.emptyTitle}>No outline yet</p>
@@ -243,7 +263,7 @@ export default function EssayOutlinePanel({ essay, onClose }: EssayOutlinePanelP
             <button
               type="button"
               className={styles.generateBtn}
-              onClick={generate}
+              onClick={() => generateMutation.mutate()}
               disabled={generating}
             >
               <Sparkles size={12} aria-hidden="true" />
@@ -265,19 +285,22 @@ export default function EssayOutlinePanel({ essay, onClose }: EssayOutlinePanelP
         )}
 
         {/* Outline sections */}
-        {!loading && !generating && hasOutline && (
+        {!isLoading && !generating && hasOutline && (
           <div className={styles.sections}>
             {SECTION_ORDER.map(section => (
               <SectionBlock
                 key={section}
                 section={section}
                 items={grouped[section]}
-                onToggle={handleToggle}
+                onToggle={(itemId, current) =>
+                  toggleMutation.mutate({ itemId, is_complete: !current })
+                }
               />
             ))}
           </div>
         )}
       </div>
     </aside>
+    </>
   );
 }
