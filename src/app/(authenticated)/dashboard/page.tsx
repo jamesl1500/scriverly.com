@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { FileText, Clock, Plus, BookOpen, TrendingUp } from 'lucide-react';
+import { FileText, Clock, Plus, BookOpen, TrendingUp, PenLine, Sparkles, LayoutList } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import { createSupabaseServerClient } from '@/libs/supabase/server';
@@ -103,8 +103,32 @@ export default async function DashboardPage() {
       </div>
 
       {recent.length === 0 ? (
-        <div className={styles.emptyState}>
-          <p className={styles.emptyText}>No essays yet.</p>
+        <div className={styles.empty}>
+          <div className={styles.emptyIcon}>
+            <PenLine size={40} strokeWidth={1.5} aria-hidden="true" />
+          </div>
+          <h3 className={styles.emptyTitle}>Your writing journey starts here</h3>
+          <p className={styles.emptyText}>
+            Scriverly helps you plan, write, and refine essays with AI-powered analysis and smart outlines.
+          </p>
+
+          <div className={styles.emptySteps}>
+            <div className={styles.emptyStep}>
+              <span className={styles.emptyStepIcon}><FileText size={16} aria-hidden="true" /></span>
+              <span className={styles.emptyStepLabel}>Create an essay</span>
+            </div>
+            <span className={styles.emptyStepDivider} aria-hidden="true" />
+            <div className={styles.emptyStep}>
+              <span className={styles.emptyStepIcon}><LayoutList size={16} aria-hidden="true" /></span>
+              <span className={styles.emptyStepLabel}>Generate an outline</span>
+            </div>
+            <span className={styles.emptyStepDivider} aria-hidden="true" />
+            <div className={styles.emptyStep}>
+              <span className={styles.emptyStepIcon}><Sparkles size={16} aria-hidden="true" /></span>
+              <span className={styles.emptyStepLabel}>Get AI analysis</span>
+            </div>
+          </div>
+
           <Link href="/essays/new" className={styles.newEssayBtn}>
             <Plus size={15} aria-hidden="true" />
             Write your first essay

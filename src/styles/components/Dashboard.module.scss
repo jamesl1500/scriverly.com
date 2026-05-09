@@ -314,4 +314,50 @@
   font-size: v.$font-size-sm;
   color: v.$color-text-muted;
   max-width: 28rem;
+  line-height: v.$line-height-relaxed;
+  margin-bottom: v.$space-8;
+}
+
+.emptySteps {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: v.$space-8;
+}
+
+.emptyStep {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  background: v.$color-bg-subtle;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-md;
+  padding: v.$space-2 v.$space-4;
+}
+
+.emptyStepIcon {
+  display: flex;
+  align-items: center;
+  color: v.$color-accent;
+}
+
+.emptyStepLabel {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-secondary;
+  white-space: nowrap;
+}
+
+.emptyStepDivider {
+  display: block;
+  width: 20px;
+  height: 1px;
+  background: v.$color-border-strong;
+  flex-shrink: 0;
+
+  @media (max-width: v.$bp-sm) {
+    display: none;
+  }
 }

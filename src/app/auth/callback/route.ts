@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from '@/libs/supabase/server';
 import type { EmailOtpType } from '@supabase/supabase-js';
 
 const DEFAULT_REDIRECT = '/onboarding';
+const RECOVERY_REDIRECT = '/reset_password';
 const EMAIL_OTP_TYPES: EmailOtpType[] = [
   'signup',
   'invite',
@@ -42,11 +43,17 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createSupabaseServerClient();
 
+  // Password recovery emails must always land on the reset page
+  const isRecovery = type === 'recovery';
+  const redirectTarget = isRecovery
+    ? RECOVERY_REDIRECT
+    : getSafeRedirectPath(next);
+
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(new URL(next, request.url));
+      return NextResponse.redirect(new URL(redirectTarget, request.url));
     }
   }
 
@@ -57,14 +64,14 @@ export async function GET(request: NextRequest) {
     });
 
     if (!error) {
-      return NextResponse.redirect(new URL(next, request.url));
+      return NextResponse.redirect(new URL(redirectTarget, request.url));
     }
   }
 
   // If auth callback methods fail but a session already exists, proceed.
   const { data: sessionData } = await supabase.auth.getSession();
   if (sessionData.session) {
-    return NextResponse.redirect(new URL(next, request.url));
+    return NextResponse.redirect(new URL(redirectTarget, request.url));
   }
 
   if (!code && !(tokenHash && isEmailOtpType(type))) {
