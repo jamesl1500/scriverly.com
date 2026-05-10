@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   X,
   Sparkles,
@@ -236,14 +237,15 @@ function CollapsibleSection({
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrigger = 0 }: EssayAISidebarProps) {
-  const [analysis,       setAnalysis]       = useState<AnalysisResult | null>(null);
-  const [loading,        setLoading]        = useState(false);
-  const [error,          setError]          = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  // ── Local UI state only ────────────────────────────────────────────────────
   const [appliedGrammar, setAppliedGrammar] = useState<Set<number>>(new Set());
   const [appliedStyle,   setAppliedStyle]   = useState<Set<number>>(new Set());
   const [upgradeModal,   setUpgradeModal]   = useState<{ used: number; limit: number } | null>(null);
-  // Track whether this is the very first mount so we don't double-call on open
   const isFirstMount = useRef(true);
+
+  // ── Apply handlers ─────────────────────────────────────────────────────────
 
   const handleApplyGrammar = useCallback((index: number, original: string, suggestion: string) => {
     if (!editor) return;
@@ -261,75 +263,68 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
     }
   }, [editor]);
 
-  // ── Load cached analysis on mount ──────────────────────────────────────────
+  // ── Fetch cached analysis (GET) ────────────────────────────────────────────
 
-  const loadCached = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  const { data: analysis, isLoading: loadingCached } = useQuery({
+    queryKey: ['essay-analysis', essay.id],
+    queryFn: async () => {
       const res = await apiClient.get<{
         success: true;
         data: { analysis: AnalysisResult | null };
       }>(`/essays/${essay.id}/analyze`);
-      setAnalysis(res.data.data.analysis);
-    } catch {
-      // Non-critical — just means no cached analysis
-      setAnalysis(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [essay.id]);
+      return res.data.data.analysis ?? null;
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
+    // Silently treat a fetch error as "no cached analysis"
+    throwOnError: false,
+  });
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadCached();
-  }, [loadCached]);
+  // ── Run / re-run analysis (POST) ───────────────────────────────────────────
 
-
-  // ── Run analysis ────────────────────────────────────────────────────────────
-
-  const runAnalysis = useCallback(async (force = false) => {
-    setLoading(true);
-    setError(null);
-    try {
+  const analyzeMutation = useMutation({
+    mutationFn: async (force: boolean) => {
       const res = await apiClient.post<{
         success: true;
         data: { analysis: AnalysisResult };
       }>(`/essays/${essay.id}/analyze`, { force });
-      setAnalysis(res.data.data.analysis);
-    } catch (err) {
+      return res.data.data.analysis;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['essay-analysis', essay.id], data);
+    },
+    onError: (err) => {
       const axiosErr = err as AxiosError<{ error: string; code?: string; used?: number; limit?: number }>;
       if (axiosErr?.response?.status === 402 && axiosErr.response.data.code === 'quota_exceeded') {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUpgradeModal({
           used:  axiosErr.response.data.used  ?? 5,
           limit: axiosErr.response.data.limit ?? 5,
         });
-        return;
       }
-      const msg = axiosErr?.response?.data?.error ?? 'Analysis failed. Please try again.';
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError(msg);
-    } finally {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoading(false);
-    }
-  }, [essay.id]);
+    },
+  });
 
-  // ── React to auto-analyze trigger from editor ────────────────────────────
+  // ── Auto-analyze trigger from editor (debounced) ───────────────────────────
 
   useEffect(() => {
-    // Skip the initial render; loadCached already handles that
     if (isFirstMount.current) {
       isFirstMount.current = false;
       return;
     }
     if (autoAnalyzeTrigger === 0) return;
-    // force: false — the server uses content_hash; Claude is skipped if unchanged
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    runAnalysis(false);
+    analyzeMutation.mutate(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoAnalyzeTrigger]);
+
+  // ── Derived state ──────────────────────────────────────────────────────────
+
+  const loading = loadingCached || analyzeMutation.isPending;
+
+  const mutationErr = analyzeMutation.error as AxiosError<{ error: string; code?: string }> | null;
+  // Don't surface quota errors here — they're handled by the upgrade modal
+  const displayError = mutationErr && mutationErr.response?.status !== 402
+    ? (mutationErr.response?.data?.error ?? 'Analysis failed. Please try again.')
+    : null;
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -387,14 +382,14 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
         )}
 
         {/* Error */}
-        {!loading && error && (
+        {!loading && displayError && (
           <div className={styles.errorState} role="alert">
             <AlertTriangle size={16} aria-hidden="true" />
-            <p>{error}</p>
+            <p>{displayError}</p>
             <button
               type="button"
               className={styles.analyzeBtn}
-              onClick={() => runAnalysis(false)}
+              onClick={() => analyzeMutation.mutate(false)}
             >
               Try Again
             </button>
@@ -402,7 +397,7 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
         )}
 
         {/* Empty state */}
-        {!loading && !error && !analysis && (
+        {!loading && !displayError && !analysis && (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon} aria-hidden="true">
               <Sparkles size={28} />
@@ -416,7 +411,7 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
             <button
               type="button"
               className={styles.analyzeBtn}
-              onClick={() => runAnalysis(false)}
+              onClick={() => analyzeMutation.mutate(false)}
             >
               <Sparkles size={13} aria-hidden="true" />
               Analyze Essay
@@ -425,7 +420,7 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
         )}
 
         {/* Analysis results */}
-        {!loading && !error && analysis && (
+        {!loading && !displayError && analysis && (
           <>
             {/* ── Score ──────────────────────────────────────────── */}
             <div className={styles.scoreSection}>
@@ -454,7 +449,7 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
             <button
               type="button"
               className={styles.reanalyzeBtn}
-              onClick={() => runAnalysis(true)}
+              onClick={() => analyzeMutation.mutate(true)}
               disabled={loading}
             >
               <RefreshCw size={12} aria-hidden="true" />
