@@ -8,7 +8,7 @@ interface LogoProps {
   href?: string;
 }
 
-export default function Logo({ size = 'md', href = '/' }: LogoProps) {
+export default function Logo({ size = 'md', href = '/dashboard' }: LogoProps) {
   const classes = [styles.logo, styles[size]].join(' ');
 
   return (

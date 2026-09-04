@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scriverly
 
-## Getting Started
+Scriverly is a writing workspace for organizing ideas, drafting content, and refining long-form text. The app combines marketing pages, authenticated product flows, onboarding, essays, profile settings, AI-assisted writing features, and subscription handling.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- Supabase
+- Stripe
+- Cypress
+- Sass
+
+## Prerequisites
+
+- Node.js 20 or newer
+- npm, pnpm, yarn, or bun
+- Access to the required Supabase, Stripe, Anthropic, and Resend credentials for local development
+
+## Setup
+
+- Install dependencies.
+
+```bash
+npm install
+```
+
+- Create a local environment file if needed and provide the required values.
+
+- Start the development server.
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The app expects values such as:
 
-## Learn More
+- `NEXT_PUBLIC_APP_NAME`
+- `NEXT_PUBLIC_APP_DESCRIPTION`
+- `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_API_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ANTHROPIC_API_KEY`
+- `RESEND_API_KEY`
+- `STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_PREMIUM_PRICE_ID`
+- `STRIPE_WEBHOOK_SECRET`
 
-To learn more about Next.js, take a look at the following resources:
+Keep secrets out of source control and use local environment files or your deployment platform's secret storage.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Available Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `npm run dev` - start the development server
+- `npm run build` - build the application for production
+- `npm run start` - run the production build
+- `npm run lint` - run ESLint
+- `npm run cypress:open` - open Cypress in interactive mode
+- `npm run cypress:run` - run the full Cypress suite
+- `npm run cypress:run:auth` - run auth-related Cypress tests
+- `npm run cypress:run:app` - run app-related Cypress tests
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `src/app` - application routes, layouts, and API handlers
+- `src/components` - shared UI and feature components
+- `src/libs` - clients, helpers, hooks, validations, and integrations
+- `src/services` - domain-specific service layers
+- `cypress` - end-to-end tests, fixtures, and support files
+- `supabase/migrations` - database migrations
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Testing
+
+Use Cypress for end-to-end coverage and ESLint for code quality checks. Add new tests near the feature they exercise so behavior stays easy to verify.
+
+## Deployment
+
+The app is designed to run in a standard Next.js deployment environment with Supabase and Stripe configured for the target environment. Make sure all environment variables are set before building or deploying.

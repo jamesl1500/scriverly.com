@@ -33,6 +33,16 @@ export default function MarketingFooter() {
           </div>
 
           <div className={styles.footerCol}>
+            <span className={styles.footerColLabel}>Support</span>
+            <div className={styles.footerColLinks}>
+              <Link href="/help-center" className={styles.footerLink}>Help center</Link>
+              <Link href="/feedback" className={styles.footerLink}>Give feedback</Link>
+              <Link href="/changelog" className={styles.footerLink}>Changelog</Link>
+              <Link href="/status" className={styles.footerLink}>System status</Link>
+            </div>
+          </div>
+
+          <div className={styles.footerCol}>
             <span className={styles.footerColLabel}>Legal</span>
             <div className={styles.footerColLinks}>
               <Link href="/terms" className={styles.footerLink}>Terms of Service</Link>

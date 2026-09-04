@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
+import { generateObject } from 'ai';
 import { createSupabaseServerClient } from '@/libs/supabase/server';
 import { successResponse, errorResponse } from '@/libs/apiHelpers';
 import { checkAndIncrementQuota } from '@/libs/aiQuota';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+import { essayModel } from '@/libs/ai/client';
+import { essayOutlineSchema } from '@/libs/ai/schemas';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -94,56 +92,35 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
 
     const essayType     = essay.essay_type    ?? 'argumentative';
     const academicLevel = (essay.academic_level ?? 'undergraduate').replace('_', ' ');
+    const citationNote  = essay.citation_style
+      ? ` Where the outline calls for evidence or sourcing, note that citations should follow ${essay.citation_style} conventions.`
+      : '';
 
-    const message = await anthropic.messages.create({
-      model:       'claude-haiku-4-5-20251001',
-      max_tokens:  1024,
-      temperature: 0.3,
-      system:
-        'You are an expert academic writing coach. Generate structured essay outlines and return JSON only. Never include prose outside the JSON object.',
-      messages: [
-        {
-          role: 'user',
-          content: `Create a detailed outline for a ${essayType} essay at the ${academicLevel} level.
+    let outline: { introduction: { heading: string; talking_point: string }[]; body: { heading: string; talking_point: string }[]; conclusion: { heading: string; talking_point: string }[] };
+    try {
+      const result = await generateObject({
+        model:      essayModel,
+        schema:     essayOutlineSchema,
+        maxOutputTokens: 2048,
+        temperature: 0.3,
+        system:
+          'You are an expert academic writing coach. Generate structured essay outlines and return JSON only.',
+        prompt: `Create a detailed outline for a ${essayType} essay at the ${academicLevel} level.${citationNote}
 
 Title: ${essay.title}
 Subject: ${essay.subject ?? 'Not specified'}${essay.summary ? `\nSummary: ${essay.summary}` : ''}
-
-Return ONLY this JSON structure (no markdown, no explanation):
-{
-  "introduction": [
-    { "heading": "<heading for this intro point>", "talking_point": "<1-2 sentences describing what to write here>" }
-  ],
-  "body": [
-    { "heading": "<heading for this body section>", "talking_point": "<1-2 sentences describing main argument or evidence>" }
-  ],
-  "conclusion": [
-    { "heading": "<heading for this conclusion point>", "talking_point": "<1-2 sentences describing what to cover>" }
-  ]
-}
 
 Guidelines:
 - introduction: 3 items (hook, background/context, thesis statement)
 - body: 3-5 items depending on essay complexity (each a major argument or point)
 - conclusion: 3 items (restate thesis, summary of arguments, closing thought/call to action)
 - Make headings specific to the actual topic, not generic
-- Make talking_points concrete and actionable
-
-Return ONLY the JSON object.`,
-        },
-      ],
-    });
-
-    const raw = message.content[0].type === 'text' ? message.content[0].text.trim() : '';
-    const jsonStr = raw.startsWith('```')
-      ? raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
-      : raw;
-
-    let outline: Record<OutlineSection, { heading: string; talking_point: string }[]>;
-    try {
-      outline = JSON.parse(jsonStr);
-    } catch {
-      return errorResponse('AI returned invalid outline format.', 500, 'parse_error');
+- Keep each talking_point to 1-2 concise sentences describing what to write there — don't draft the actual content`,
+      });
+      outline = result.object;
+    } catch (genErr) {
+      console.error('[outline] Generation failed:', genErr);
+      return errorResponse('AI returned an invalid outline format.', 500, 'parse_error');
     }
 
     // Delete existing items for this essay

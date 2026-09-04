@@ -61,7 +61,7 @@ export default async function AuthenticatedLayout({
             {/* Support */}
             <div className={styles.footerCol}>
               <p className={styles.footerColHeading}>Support</p>
-              <Link href="/help" className={styles.footerColLink}>Help center</Link>
+              <Link href="/help-center" className={styles.footerColLink}>Help center</Link>
               <Link href="/feedback" className={styles.footerColLink}>Give feedback</Link>
               <Link href="/changelog" className={styles.footerColLink}>Changelog</Link>
               <Link href="/status" className={styles.footerColLink}>System status</Link>
@@ -71,7 +71,6 @@ export default async function AuthenticatedLayout({
             <div className={styles.footerCol}>
               <p className={styles.footerColHeading}>Company</p>
               <Link href="/about" className={styles.footerColLink}>About</Link>
-              <Link href="/blog" className={styles.footerColLink}>Blog</Link>
               <a
                 href="mailto:hello@scriverly.com"
                 className={styles.footerColLink}

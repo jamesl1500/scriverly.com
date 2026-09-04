@@ -586,3 +586,271 @@
   color: v.$color-error;
   margin-top: v.$space-1;
 }
+
+.contactLabelOptional {
+  font-weight: v.$font-weight-regular;
+  color: v.$color-text-muted;
+}
+
+// ===== Help center =====
+
+.helpGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-10;
+
+  @include m.md {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.helpCategory {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-4;
+}
+
+.helpCategoryTitle {
+  font-size: v.$font-size-lg;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  padding-bottom: v.$space-3;
+  border-bottom: 1px solid v.$color-border;
+}
+
+.helpArticleList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+.helpArticleLink {
+  font-size: v.$font-size-base;
+  color: v.$color-accent;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+.helpCta {
+  margin-top: v.$space-16;
+  padding-top: v.$space-10;
+  border-top: 1px solid v.$color-border;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: v.$space-5;
+
+  @include m.sm {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.helpCtaText {
+  font-size: v.$font-size-base;
+  color: v.$color-text-secondary;
+}
+
+// ===== Changelog =====
+
+.changelogList {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-14;
+}
+
+.changelogEntry {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-6;
+}
+
+.changelogMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: v.$space-3;
+}
+
+.changelogTagRelease,
+.changelogTagInitial,
+.changelogTagHotfix {
+  display: inline-flex;
+  align-items: center;
+  padding: v.$space-1 v.$space-3;
+  border-radius: v.$radius-full;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: v.$tracking-wide;
+}
+
+.changelogTagRelease {
+  background-color: v.$color-accent-lighter;
+  color: v.$color-accent-dark;
+  border: 1px solid rgba(v.$color-accent, 0.25);
+}
+
+.changelogTagInitial {
+  background-color: rgba(v.$color-success, 0.08);
+  color: v.$color-success;
+  border: 1px solid rgba(v.$color-success, 0.2);
+}
+
+.changelogTagHotfix {
+  background-color: rgba(v.$color-error, 0.08);
+  color: v.$color-error;
+  border: 1px solid rgba(v.$color-error, 0.2);
+}
+
+.changelogVersion {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  font-variant-numeric: tabular-nums;
+}
+
+.changelogDate {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+}
+
+.changelogItems {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+}
+
+.changelogItem {
+  display: flex;
+  align-items: baseline;
+  gap: v.$space-3;
+}
+
+.changelogBadgeNew,
+.changelogBadgeImproved,
+.changelogBadgeFixed {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.5rem;
+  padding: 0 v.$space-2;
+  height: 1.375rem;
+  border-radius: v.$radius-sm;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: v.$tracking-wide;
+}
+
+.changelogBadgeNew {
+  background-color: v.$color-accent-lighter;
+  color: v.$color-accent-dark;
+}
+
+.changelogBadgeImproved {
+  background-color: rgba(v.$color-success, 0.08);
+  color: v.$color-success;
+}
+
+.changelogBadgeFixed {
+  background-color: rgba(v.$color-text-muted, 0.1);
+  color: v.$color-text-muted;
+}
+
+.changelogItemText {
+  font-size: v.$font-size-base;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+}
+
+// ===== System status =====
+
+.statusBannerGood,
+.statusBannerIssue {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  padding: v.$space-4 v.$space-6;
+  border-radius: v.$radius-lg;
+  font-size: v.$font-size-base;
+  margin-bottom: v.$space-10;
+}
+
+.statusBannerGood {
+  background-color: rgba(v.$color-success, 0.08);
+  border: 1px solid rgba(v.$color-success, 0.2);
+  color: v.$color-success;
+}
+
+.statusBannerIssue {
+  background-color: rgba(v.$color-error, 0.08);
+  border: 1px solid rgba(v.$color-error, 0.2);
+  color: v.$color-error;
+}
+
+.statusBannerDot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: v.$radius-full;
+  background-color: currentColor;
+  flex-shrink: 0;
+}
+
+.statusTable {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+  overflow: hidden;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: v.$space-4 v.$space-6;
+  background-color: v.$color-bg-page;
+  border-bottom: 1px solid v.$color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.statusServiceName {
+  font-size: v.$font-size-base;
+  color: v.$color-text-primary;
+}
+
+.statusBadgeGood,
+.statusBadgeBad {
+  display: inline-flex;
+  align-items: center;
+  padding: v.$space-1 v.$space-3;
+  border-radius: v.$radius-full;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+}
+
+.statusBadgeGood {
+  background-color: rgba(v.$color-success, 0.1);
+  color: v.$color-success;
+}
+
+.statusBadgeBad {
+  background-color: rgba(v.$color-error, 0.1);
+  color: v.$color-error;
+}

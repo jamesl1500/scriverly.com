@@ -14,7 +14,7 @@ import {
   Check,
 } from 'lucide-react';
 import type { Editor } from '@tiptap/react';
-import type { AxiosError } from 'axios';
+import { parsePartialJson } from 'ai';
 
 import type { Essay } from '@/libs/validations/essay';
 import apiClient from '@/libs/apiClient';
@@ -65,7 +65,78 @@ interface EssayAISidebarProps {
   autoAnalyzeTrigger?:  number;
 }
 
+type AnalysisFields = Omit<AnalysisResult, 'id' | 'content_hash' | 'updated_at'>;
+type PartialAnalysis = Partial<AnalysisFields>;
+
+class AnalyzeRequestError extends Error {
+  status: number;
+  code?:  string;
+  used?:  number;
+  limit?: number;
+
+  constructor(message: string, status: number, extra?: { code?: string; used?: number; limit?: number }) {
+    super(message);
+    this.status = status;
+    this.code   = extra?.code;
+    this.used   = extra?.used;
+    this.limit  = extra?.limit;
+  }
+}
+
+// ── Stream the POST /analyze response, reporting partial progress ─────────────
+//
+// The route streams raw JSON text as the model generates it. A cache hit (or
+// an error) instead comes back as a normal application/json response, so the
+// content-type distinguishes the two cases.
+
+async function streamAnalysis(
+  essayId:   string,
+  force:     boolean,
+  onPartial: (partial: PartialAnalysis) => void,
+): Promise<{ cached: true; analysis: AnalysisResult } | { cached: false; fields: AnalysisFields }> {
+  const res = await fetch(`/api/essays/${essayId}/analyze`, {
+    method:      'POST',
+    headers:     { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body:        JSON.stringify({ force }),
+  });
+
+  const isJson = (res.headers.get('content-type') ?? '').includes('application/json');
+
+  if (!res.ok || isJson) {
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new AnalyzeRequestError(
+        data.error ?? 'Analysis failed. Please try again.',
+        res.status,
+        { code: data.code, used: data.used, limit: data.limit },
+      );
+    }
+    // 200 + JSON = cache hit, returned as { success, data: { analysis, cached } }
+    return { cached: true, analysis: data.data.analysis as AnalysisResult };
+  }
+
+  const reader = res.body?.getReader();
+  if (!reader) throw new AnalyzeRequestError('Streaming is not supported in this browser.', 500);
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const { value: partial } = await parsePartialJson(buffer);
+    if (partial && typeof partial === 'object') onPartial(partial as PartialAnalysis);
+  }
+
+  return { cached: false, fields: JSON.parse(buffer) as AnalysisFields };
+}
+
 // ── Apply grammar fix via ProseMirror find-and-replace ────────────────────────
+//
+// Searches each textblock's full plain text (concatenated across its inline
+// children) rather than one text node at a time, so a match spanning a mark
+// boundary — e.g. "quick" in "The **quick** brown fox" — is still found.
 
 function applyGrammarFix(
   editor: Editor,
@@ -78,11 +149,32 @@ function applyGrammarFix(
 
   doc.descendants((node, pos) => {
     if (applied) return false;
-    if (!node.isText || !node.text) return;
-    const idx = node.text.indexOf(original);
-    if (idx === -1) return;
-    const start = pos + idx;
-    const end   = start + original.length;
+    if (!node.isTextblock) return true; // keep descending until a textblock
+
+    let blockText = '';
+    const segments: { start: number; text: string }[] = [];
+    node.forEach((child, offset) => {
+      if (child.isText && child.text) {
+        segments.push({ start: pos + 1 + offset, text: child.text });
+        blockText += child.text;
+      }
+    });
+
+    const idx = blockText.indexOf(original);
+    if (idx === -1) return false; // no match here — don't descend further
+
+    let remaining = idx;
+    let start = -1;
+    for (const seg of segments) {
+      if (remaining < seg.text.length) {
+        start = seg.start + remaining;
+        break;
+      }
+      remaining -= seg.text.length;
+    }
+    if (start === -1) return false;
+
+    const end = start + original.length;
     dispatch(tr.replaceWith(start, end, schema.text(replacement)));
     applied = true;
     return false;
@@ -243,6 +335,7 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
   const [appliedGrammar, setAppliedGrammar] = useState<Set<number>>(new Set());
   const [appliedStyle,   setAppliedStyle]   = useState<Set<number>>(new Set());
   const [upgradeModal,   setUpgradeModal]   = useState<{ used: number; limit: number } | null>(null);
+  const [streaming,      setStreaming]      = useState<PartialAnalysis | null>(null);
   const isFirstMount = useRef(true);
 
   // ── Apply handlers ─────────────────────────────────────────────────────────
@@ -265,8 +358,10 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
 
   // ── Fetch cached analysis (GET) ────────────────────────────────────────────
 
-  const { data: analysis, isLoading: loadingCached } = useQuery({
-    queryKey: ['essay-analysis', essay.id],
+  const analysisQueryKey = ['essay-analysis', essay.id];
+
+  const { data: analysis, isLoading: loadingCached, refetch: refetchAnalysis } = useQuery({
+    queryKey: analysisQueryKey,
     queryFn: async () => {
       const res = await apiClient.get<{
         success: true;
@@ -280,25 +375,39 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
     throwOnError: false,
   });
 
-  // ── Run / re-run analysis (POST) ───────────────────────────────────────────
+  // ── Run / re-run analysis (POST, streamed) ─────────────────────────────────
 
   const analyzeMutation = useMutation({
-    mutationFn: async (force: boolean) => {
-      const res = await apiClient.post<{
-        success: true;
-        data: { analysis: AnalysisResult };
-      }>(`/essays/${essay.id}/analyze`, { force });
-      return res.data.data.analysis;
+    mutationFn: (force: boolean) => streamAnalysis(essay.id, force, setStreaming),
+    onMutate: () => {
+      setStreaming(null);
     },
-    onSuccess: (data) => {
-      queryClient.setQueryData(['essay-analysis', essay.id], data);
+    onSuccess: (outcome) => {
+      if (outcome.cached) {
+        queryClient.setQueryData(analysisQueryKey, outcome.analysis);
+        return;
+      }
+      // Render the freshly-streamed result immediately with placeholder
+      // metadata, then reconcile with the persisted row (id/content_hash)
+      // once the server's onFinish upsert has had time to land.
+      const existing = queryClient.getQueryData<AnalysisResult | null>(analysisQueryKey);
+      queryClient.setQueryData<AnalysisResult>(analysisQueryKey, {
+        id:           existing?.id ?? 'pending',
+        content_hash: existing?.content_hash ?? '',
+        updated_at:   new Date().toISOString(),
+        ...outcome.fields,
+      });
+      setTimeout(() => { void refetchAnalysis(); }, 1500);
+    },
+    onSettled: () => {
+      setStreaming(null);
     },
     onError: (err) => {
-      const axiosErr = err as AxiosError<{ error: string; code?: string; used?: number; limit?: number }>;
-      if (axiosErr?.response?.status === 402 && axiosErr.response.data.code === 'quota_exceeded') {
+      const analyzeErr = err instanceof AnalyzeRequestError ? err : null;
+      if (analyzeErr?.status === 402 && analyzeErr.code === 'quota_exceeded') {
         setUpgradeModal({
-          used:  axiosErr.response.data.used  ?? 5,
-          limit: axiosErr.response.data.limit ?? 5,
+          used:  analyzeErr.used  ?? 5,
+          limit: analyzeErr.limit ?? 5,
         });
       }
     },
@@ -318,12 +427,19 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
 
   // ── Derived state ──────────────────────────────────────────────────────────
 
-  const loading = loadingCached || analyzeMutation.isPending;
+  // While streaming, show a live preview (score ring + breakdown + feedback)
+  // as soon as the model has produced a score — the full result (with
+  // recommendations) still renders from `analysis` once the mutation settles.
+  const streamingPreview = analyzeMutation.isPending && streaming?.score !== undefined
+    ? streaming
+    : null;
 
-  const mutationErr = analyzeMutation.error as AxiosError<{ error: string; code?: string }> | null;
+  const loading = loadingCached || (analyzeMutation.isPending && !streamingPreview);
+
+  const analyzeErr = analyzeMutation.error instanceof AnalyzeRequestError ? analyzeMutation.error : null;
   // Don't surface quota errors here — they're handled by the upgrade modal
-  const displayError = mutationErr && mutationErr.response?.status !== 402
-    ? (mutationErr.response?.data?.error ?? 'Analysis failed. Please try again.')
+  const displayError = analyzeErr && analyzeErr.status !== 402
+    ? analyzeErr.message
     : null;
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -336,6 +452,17 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
         ['Style Alignment', breakdown.style_alignment  ?? 0],
         ['Grammar',         breakdown.grammar          ?? 0],
         ['Vocabulary',      breakdown.vocabulary       ?? 0],
+      ]
+    : [];
+
+  const streamingBreakdown = streamingPreview?.score_breakdown;
+  const streamingBreakdownEntries: [string, number][] = streamingBreakdown
+    ? [
+        ['Clarity',         streamingBreakdown.clarity         ?? 0],
+        ['Structure',       streamingBreakdown.structure       ?? 0],
+        ['Style Alignment', streamingBreakdown.style_alignment ?? 0],
+        ['Grammar',         streamingBreakdown.grammar         ?? 0],
+        ['Vocabulary',      streamingBreakdown.vocabulary      ?? 0],
       ]
     : [];
 
@@ -381,6 +508,33 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
           </div>
         )}
 
+        {/* Streaming preview — score/breakdown/feedback fill in as they arrive */}
+        {streamingPreview && (
+          <>
+            <div className={styles.scoreSection}>
+              <ScoreRing score={streamingPreview.score ?? 0} />
+              <div className={styles.scoreMeta}>
+                <p className={styles.scoreGrade} style={{ color: scoreColor(streamingPreview.score ?? 0) }}>
+                  Analyzing…
+                </p>
+              </div>
+            </div>
+            {streamingBreakdownEntries.length > 0 && (
+              <div className={styles.breakdownSection}>
+                {streamingBreakdownEntries.map(([label, value]) => (
+                  <BreakdownBar key={label} label={label} value={value} />
+                ))}
+              </div>
+            )}
+            {streamingPreview.overall_feedback && (
+              <div className={styles.feedbackSection}>
+                <h3 className={styles.feedbackTitle}>Overall Feedback</h3>
+                <p className={styles.feedbackText}>{streamingPreview.overall_feedback}</p>
+              </div>
+            )}
+          </>
+        )}
+
         {/* Error */}
         {!loading && displayError && (
           <div className={styles.errorState} role="alert">
@@ -397,7 +551,7 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
         )}
 
         {/* Empty state */}
-        {!loading && !displayError && !analysis && (
+        {!loading && !displayError && !analysis && !streamingPreview && (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon} aria-hidden="true">
               <Sparkles size={28} />
@@ -420,7 +574,7 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
         )}
 
         {/* Analysis results */}
-        {!loading && !displayError && analysis && (
+        {!loading && !displayError && analysis && !streamingPreview && (
           <>
             {/* ── Score ──────────────────────────────────────────── */}
             <div className={styles.scoreSection}>
