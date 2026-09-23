@@ -4,7 +4,7 @@ import SettingsContent from './_components/SettingsContent';
 import type { SettingsFormValues } from '@/libs/validations/user';
 import styles from '@/styles/components/Settings.module.scss';
 
-export const metadata = { title: 'Settings — Scriverly' };
+export const metadata = { title: 'Settings' };
 
 interface PageProps {
   searchParams: Promise<{ billing?: string }>;

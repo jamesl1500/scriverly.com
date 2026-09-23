@@ -627,15 +627,28 @@
   gap: v.$space-2;
 }
 
-.helpArticleLink {
-  font-size: v.$font-size-base;
-  color: v.$color-accent;
-  text-decoration: none;
+.helpArticleItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: v.$space-3;
+}
 
-  &:hover {
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
+.helpArticleLabel {
+  font-size: v.$font-size-base;
+  color: v.$color-text-secondary;
+}
+
+.helpArticleSoon {
+  flex-shrink: 0;
+  padding: v.$space-1 v.$space-2;
+  border-radius: v.$radius-full;
+  background-color: v.$color-bg-subtle;
+  color: v.$color-text-muted;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-medium;
+  letter-spacing: v.$tracking-wide;
+  text-transform: uppercase;
 }
 
 .helpCta {

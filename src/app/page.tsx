@@ -1,16 +1,11 @@
 import Link from 'next/link';
 import { Sparkles, BookOpen, FileText, BarChart2, ArrowRight } from 'lucide-react';
-import type { Metadata } from 'next';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import styles from '@/styles/layouts/marketing-layout.module.scss';
 import page from '@/styles/pages/marketing.module.scss';
 
-export const metadata: Metadata = {
-  title: 'Scriverly — AI-Powered Academic Writing Assistant',
-  description:
-    'Write better essays with real-time AI feedback, smart outlines, grammar analysis, and style guidance tailored to your academic level.',
-};
+// Title and description are inherited from the root layout's default metadata.
 
 const features = [
   {

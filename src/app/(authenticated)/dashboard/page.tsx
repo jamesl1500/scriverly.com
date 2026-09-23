@@ -8,7 +8,7 @@ import { ESSAY_TYPE_LABELS } from '@/libs/validations/essay';
 import styles from '@/styles/components/Dashboard.module.scss';
 
 export const metadata: Metadata = {
-  title: 'Dashboard — Scriverly',
+  title: 'Dashboard',
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

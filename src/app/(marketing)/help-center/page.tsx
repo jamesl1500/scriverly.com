@@ -3,7 +3,7 @@ import Link from 'next/link';
 import page from '@/styles/pages/marketing.module.scss';
 
 export const metadata: Metadata = {
-  title: 'Help Center — Scriverly',
+  title: 'Help Center',
   description:
     'Find answers to common questions about using Scriverly, managing your account, and getting the most out of your subscription.',
 };
@@ -12,37 +12,37 @@ const categories = [
   {
     title: 'Getting started',
     articles: [
-      { label: 'Creating your first essay', href: '#' },
-      { label: 'How the AI sidebar works', href: '#' },
-      { label: 'Using the outline generator', href: '#' },
-      { label: 'Importing existing writing', href: '#' },
+      'Creating your first essay',
+      'How the AI sidebar works',
+      'Using the outline generator',
+      'Importing existing writing',
     ],
   },
   {
     title: 'Account and billing',
     articles: [
-      { label: 'Upgrading to Premium', href: '#' },
-      { label: 'Cancelling your subscription', href: '#' },
-      { label: 'Updating payment details', href: '#' },
-      { label: 'Requesting a refund', href: '#' },
+      'Upgrading to Premium',
+      'Cancelling your subscription',
+      'Updating payment details',
+      'Requesting a refund',
     ],
   },
   {
     title: 'Writing and feedback',
     articles: [
-      { label: 'Understanding your AI analysis score', href: '#' },
-      { label: 'Choosing your academic level', href: '#' },
-      { label: 'Citation style support', href: '#' },
-      { label: 'Vocabulary and style suggestions', href: '#' },
+      'Understanding your AI analysis score',
+      'Choosing your academic level',
+      'Citation style support',
+      'Vocabulary and style suggestions',
     ],
   },
   {
     title: 'Privacy and data',
     articles: [
-      { label: 'How your essays are stored', href: '#' },
-      { label: 'Deleting your account and data', href: '#' },
-      { label: 'AI training and your content', href: '#' },
-      { label: 'Data export', href: '#' },
+      'How your essays are stored',
+      'Deleting your account and data',
+      'AI training and your content',
+      'Data export',
     ],
   },
 ];
@@ -67,11 +67,10 @@ export default function HelpCenterPage() {
             <div key={cat.title} className={page.helpCategory}>
               <h2 className={page.helpCategoryTitle}>{cat.title}</h2>
               <ul className={page.helpArticleList}>
-                {cat.articles.map(article => (
-                  <li key={article.label}>
-                    <Link href={article.href} className={page.helpArticleLink}>
-                      {article.label}
-                    </Link>
+                {cat.articles.map(label => (
+                  <li key={label} className={page.helpArticleItem}>
+                    <span className={page.helpArticleLabel}>{label}</span>
+                    <span className={page.helpArticleSoon}>Coming soon</span>
                   </li>
                 ))}
               </ul>

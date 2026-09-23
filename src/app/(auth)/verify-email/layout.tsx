@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 export const metadata: Metadata = {
   title: 'Verify Email',
   description: 'Verify your email address to activate your Scriverly account.',
+  robots: { index: false, follow: false },
 };
 
 export default function VerifyEmailLayout({ children }: { children: ReactNode }) {

@@ -47,6 +47,7 @@ export default function MarketingFooter() {
             <div className={styles.footerColLinks}>
               <Link href="/terms" className={styles.footerLink}>Terms of Service</Link>
               <Link href="/privacy" className={styles.footerLink}>Privacy Policy</Link>
+              <Link href="/cookies" className={styles.footerLink}>Cookie Policy</Link>
             </div>
           </div>
         </div>
@@ -58,6 +59,7 @@ export default function MarketingFooter() {
           <div className={styles.footerLegal}>
             <Link href="/terms" className={styles.footerLegalLink}>Terms</Link>
             <Link href="/privacy" className={styles.footerLegalLink}>Privacy</Link>
+            <Link href="/cookies" className={styles.footerLegalLink}>Cookies</Link>
           </div>
         </div>
       </div>

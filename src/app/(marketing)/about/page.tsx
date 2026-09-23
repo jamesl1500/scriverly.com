@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import page from '@/styles/pages/marketing.module.scss';
 
 export const metadata: Metadata = {
-  title: 'About — Scriverly',
+  title: 'About',
   description:
     'Learn about Scriverly — the AI-powered academic writing assistant built for students, researchers, and academics.',
 };

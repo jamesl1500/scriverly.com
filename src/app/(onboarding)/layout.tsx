@@ -1,7 +1,13 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/libs/supabase/server';
 import Logo from '@/components/ui/Logo/Logo';
 import styles from '@/styles/layouts/onboarding-layout.module.scss';
+
+export const metadata: Metadata = {
+  title: 'Onboarding',
+  robots: { index: false, follow: false },
+};
 
 export default async function OnboardingLayout({
   children,

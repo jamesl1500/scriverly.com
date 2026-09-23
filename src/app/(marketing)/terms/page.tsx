@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import page from '@/styles/pages/marketing.module.scss';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — Scriverly',
+  title: 'Terms of Service',
   description: 'Read the Scriverly Terms of Service.',
 };
 

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseServerClient } from '@/libs/supabase/server';
@@ -5,6 +6,11 @@ import Logo from '@/components/ui/Logo/Logo';
 import QueryProvider from '@/components/QueryProvider';
 import AppNav from './_components/AppNav';
 import styles from '@/styles/layouts/app-layout.module.scss';
+
+// Everything under the authenticated app is behind a login wall — keep it out of search results.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function AuthenticatedLayout({
   children,

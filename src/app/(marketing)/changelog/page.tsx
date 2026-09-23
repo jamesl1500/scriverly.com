@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import page from '@/styles/pages/marketing.module.scss';
 
 export const metadata: Metadata = {
-  title: 'Changelog — Scriverly',
+  title: 'Changelog',
   description: 'A running log of product updates, improvements, and fixes shipped to Scriverly.',
 };
 

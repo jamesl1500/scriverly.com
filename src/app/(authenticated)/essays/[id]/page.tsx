@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return { title: 'Essay — Scriverly' };
+    return { title: 'Essay' };
   }
 
   const { data: essay } = await supabase
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .single();
 
   return {
-    title: essay?.title ? `${essay.title} — Scriverly` : 'Essay — Scriverly',
+    title: essay?.title || 'Essay',
   };
 }
 

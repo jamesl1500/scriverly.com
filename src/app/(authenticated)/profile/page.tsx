@@ -4,7 +4,7 @@ import ProfileForm from './_components/ProfileForm';
 import type { ProfileFormValues } from '@/libs/validations/user';
 import styles from '@/styles/components/Profile.module.scss';
 
-export const metadata = { title: 'Profile — Scriverly' };
+export const metadata = { title: 'Profile' };
 
 export default async function ProfilePage() {
   const supabase = await createSupabaseServerClient();

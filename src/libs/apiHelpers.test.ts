@@ -58,6 +58,51 @@ describe('handleSupabaseAuthError', () => {
     expect(result.status).toBe(429);
   });
 
+  it('maps over_request_rate_limit to a 429', () => {
+    const result = handleSupabaseAuthError(makeError('over_request_rate_limit', 429));
+    expect(result.status).toBe(429);
+  });
+
+  it('maps email_not_confirmed to a 403', () => {
+    const result = handleSupabaseAuthError(makeError('email_not_confirmed', 400));
+    expect(result).toEqual({
+      message: 'Please verify your email before signing in.',
+      status: 403,
+      code: 'email_not_confirmed',
+    });
+  });
+
+  it('maps user_already_exists to a 409', () => {
+    const result = handleSupabaseAuthError(makeError('user_already_exists', 400));
+    expect(result.status).toBe(409);
+    expect(result.message).toMatch(/already exists/i);
+  });
+
+  it('maps email_exists to a 409', () => {
+    const result = handleSupabaseAuthError(makeError('email_exists', 400));
+    expect(result.status).toBe(409);
+  });
+
+  it('maps weak_password to a 422', () => {
+    const result = handleSupabaseAuthError(makeError('weak_password', 400));
+    expect(result.status).toBe(422);
+  });
+
+  it('maps same_password to a 422', () => {
+    const result = handleSupabaseAuthError(makeError('same_password', 400));
+    expect(result.status).toBe(422);
+  });
+
+  it('maps otp_expired to a 410', () => {
+    const result = handleSupabaseAuthError(makeError('otp_expired', 400));
+    expect(result.status).toBe(410);
+  });
+
+  it('maps token_expired to a 410', () => {
+    const result = handleSupabaseAuthError(makeError('token_expired', 400));
+    expect(result.status).toBe(410);
+  });
+
   it('falls back to a generic message for unknown 5xx errors', () => {
     const result = handleSupabaseAuthError(makeError('some_new_code', 503, 'boom'));
     expect(result).toEqual({

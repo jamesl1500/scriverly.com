@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import page from '@/styles/pages/marketing.module.scss';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — Scriverly',
+  title: 'Privacy Policy',
   description: 'Read the Scriverly Privacy Policy to understand how we collect, use, and protect your data.',
 };
 

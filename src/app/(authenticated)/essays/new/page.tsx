@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from '@/libs/supabase/server';
 import EssayCreationWizard from './_components/EssayCreationWizard';
 
 export const metadata: Metadata = {
-  title: 'New Essay — Scriverly',
+  title: 'New Essay',
 };
 
 export default async function NewEssayPage() {

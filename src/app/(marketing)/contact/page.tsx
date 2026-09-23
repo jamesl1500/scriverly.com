@@ -3,7 +3,7 @@ import page from '@/styles/pages/marketing.module.scss';
 import ContactForm from './_components/ContactForm';
 
 export const metadata: Metadata = {
-  title: 'Contact Us — Scriverly',
+  title: 'Contact Us',
   description: 'Get in touch with the Scriverly team. We read every message.',
 };
 

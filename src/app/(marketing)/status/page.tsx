@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import page from '@/styles/pages/marketing.module.scss';
 
 export const metadata: Metadata = {
-  title: 'System Status — Scriverly',
+  title: 'System Status',
   description: 'Live operational status for all Scriverly services.',
 };
 

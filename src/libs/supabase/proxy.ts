@@ -40,9 +40,14 @@ export async function updateSession(request: NextRequest) {
   const publicPaths = [
     '/',
     '/about',
-    '/terms',
-    '/privacy',
+    '/changelog',
     '/contact',
+    '/cookies',
+    '/feedback',
+    '/help-center',
+    '/privacy',
+    '/status',
+    '/terms',
     '/login',
     '/signup',
     '/forgot_password',
@@ -50,6 +55,11 @@ export async function updateSession(request: NextRequest) {
     '/verify-email',
     '/api/auth',
     '/api/billing/webhook',
+    '/robots.txt',
+    '/sitemap.xml',
+    '/manifest.webmanifest',
+    '/opengraph-image',
+    '/twitter-image',
   ];
 
   const isPublic =

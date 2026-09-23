@@ -3,7 +3,7 @@ import page from '@/styles/pages/marketing.module.scss';
 import FeedbackForm from './_components/FeedbackForm';
 
 export const metadata: Metadata = {
-  title: 'Give Feedback — Scriverly',
+  title: 'Give Feedback',
   description:
     'Share a bug report, feature request, or general suggestion with the Scriverly team.',
 };

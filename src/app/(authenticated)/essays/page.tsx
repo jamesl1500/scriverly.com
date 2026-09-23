@@ -9,7 +9,7 @@ import EssayListClient from './_components/EssayListClient';
 import styles from '@/styles/components/EssayList.module.scss';
 
 export const metadata: Metadata = {
-  title: 'My Essays — Scriverly',
+  title: 'My Essays',
 };
 
 export default async function EssaysPage() {
