@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/libs/seo';
 import page from '@/styles/pages/marketing.module.scss';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'System Status',
   description: 'Live operational status for all Scriverly services.',
-};
+  path: '/status',
+});
 
 const services = [
   { name: 'Web application', status: 'operational' },

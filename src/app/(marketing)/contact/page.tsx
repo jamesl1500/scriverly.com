@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/libs/seo';
 import page from '@/styles/pages/marketing.module.scss';
 import ContactForm from './_components/ContactForm';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Contact Us',
   description: 'Get in touch with the Scriverly team. We read every message.',
-};
+  path: '/contact',
+});
 
 export default function ContactPage() {
   return (

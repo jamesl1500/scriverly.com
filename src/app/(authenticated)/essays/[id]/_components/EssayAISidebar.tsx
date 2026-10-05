@@ -93,12 +93,14 @@ async function streamAnalysis(
   essayId:   string,
   force:     boolean,
   onPartial: (partial: PartialAnalysis) => void,
+  signal:    AbortSignal,
 ): Promise<{ cached: true; analysis: AnalysisResult } | { cached: false; fields: AnalysisFields }> {
   const res = await fetch(`/api/essays/${essayId}/analyze`, {
     method:      'POST',
     headers:     { 'Content-Type': 'application/json' },
     credentials: 'include',
     body:        JSON.stringify({ force }),
+    signal,
   });
 
   const isJson = (res.headers.get('content-type') ?? '').includes('application/json');
@@ -126,6 +128,7 @@ async function streamAnalysis(
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
     const { value: partial } = await parsePartialJson(buffer);
+    if (signal.aborted) break;
     if (partial && typeof partial === 'object') onPartial(partial as PartialAnalysis);
   }
 
@@ -377,8 +380,17 @@ export default function EssayAISidebar({ essay, editor, onClose, autoAnalyzeTrig
 
   // ── Run / re-run analysis (POST, streamed) ─────────────────────────────────
 
+  // A newer run supersedes the in-flight one: aborting it stops the server-side
+  // generation instead of paying for an analysis nobody will see.
+  const analyzeAbort = useRef<AbortController | null>(null);
+
   const analyzeMutation = useMutation({
-    mutationFn: (force: boolean) => streamAnalysis(essay.id, force, setStreaming),
+    mutationFn: (force: boolean) => {
+      analyzeAbort.current?.abort();
+      const controller = new AbortController();
+      analyzeAbort.current = controller;
+      return streamAnalysis(essay.id, force, setStreaming, controller.signal);
+    },
     onMutate: () => {
       setStreaming(null);
     },

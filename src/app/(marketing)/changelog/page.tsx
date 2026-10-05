@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/libs/seo';
 import page from '@/styles/pages/marketing.module.scss';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Changelog',
   description: 'A running log of product updates, improvements, and fixes shipped to Scriverly.',
-};
+  path: '/changelog',
+});
 
 const releases = [
   {

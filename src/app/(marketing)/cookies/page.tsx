@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/libs/seo';
 import page from '@/styles/pages/marketing.module.scss';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Cookie Policy',
   description: 'Read the Scriverly Cookie Policy to understand which cookies we use and why.',
-};
+  path: '/cookies',
+});
 
 export default function CookiesPage() {
   return (

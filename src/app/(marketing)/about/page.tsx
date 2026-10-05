@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/libs/seo';
 import page from '@/styles/pages/marketing.module.scss';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'About',
   description:
     'Learn about Scriverly — the AI-powered academic writing assistant built for students, researchers, and academics.',
-};
+  path: '/about',
+});
 
 const values = [
   {

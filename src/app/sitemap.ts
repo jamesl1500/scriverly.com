@@ -11,7 +11,6 @@ const staticRoutes: Array<{
   { path: '/changelog', changeFrequency: 'weekly', priority: 0.5 },
   { path: '/contact', changeFrequency: 'yearly', priority: 0.5 },
   { path: '/feedback', changeFrequency: 'yearly', priority: 0.4 },
-  { path: '/help-center', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/status', changeFrequency: 'daily', priority: 0.3 },
   { path: '/login', changeFrequency: 'yearly', priority: 0.5 },
   { path: '/signup', changeFrequency: 'yearly', priority: 0.8 },
@@ -20,12 +19,11 @@ const staticRoutes: Array<{
   { path: '/cookies', changeFrequency: 'yearly', priority: 0.3 },
 ];
 
+// No `lastModified`: stamping every URL with the request time tells crawlers
+// nothing, and search engines ignore the field once it proves unreliable.
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
-
   return staticRoutes.map(({ path, changeFrequency, priority }) => ({
     url: `${SITE_URL}${path}`,
-    lastModified,
     changeFrequency,
     priority,
   }));

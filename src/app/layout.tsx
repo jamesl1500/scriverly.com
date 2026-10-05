@@ -7,6 +7,7 @@ import {
   SITE_TITLE,
   SITE_URL,
 } from "@/config/site";
+import { jsonLd } from "@/libs/seo";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,11 +31,20 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
+  // Canonical and og:url are set per page (see pageMetadata in libs/seo) —
+  // setting them here would make every page inherit the homepage's URL.
   openGraph: {
     type: "website",
-    url: "/",
     siteName: SITE_NAME,
+    locale: "en_US",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
@@ -43,8 +53,11 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
-  alternates: {
-    canonical: "/",
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    other: process.env.BING_SITE_VERIFICATION
+      ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION }
+      : undefined,
   },
 };
 
@@ -53,13 +66,27 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-const organizationJsonLd = {
+const siteJsonLd = {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  name: SITE_NAME,
-  url: SITE_URL,
-  description: SITE_DESCRIPTION,
-  applicationCategory: "EducationApplication",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}/icon.svg`,
+      description: SITE_DESCRIPTION,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+      inLanguage: "en",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -76,9 +103,7 @@ export default function RootLayout({
         {children}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c"),
-          }}
+          dangerouslySetInnerHTML={{ __html: jsonLd(siteJsonLd) }}
         />
       </body>
     </html>

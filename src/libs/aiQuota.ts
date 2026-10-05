@@ -39,28 +39,28 @@ export async function checkAndIncrementQuota(
   userId: string,
   type: QuotaType,
 ): Promise<QuotaResult> {
-  // 1. Read the user's plan
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('plan')
-    .eq('user_id', userId)
-    .single();
+  const limit  = limitFor(type);
+  const period = currentPeriod();
+
+  // 1. Read the user's plan and current usage in one round trip
+  const [{ data: profile }, { data: row }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('plan')
+      .eq('user_id', userId)
+      .single(),
+    supabase
+      .from('ai_usage')
+      .select('count')
+      .eq('user_id', userId)
+      .eq('type', type)
+      .eq('period', period)
+      .single(),
+  ]);
 
   if (profile?.plan === 'premium') {
     return { allowed: true, used: 0, limit: null };
   }
-
-  const limit  = limitFor(type);
-  const period = currentPeriod();
-
-  // 2. Read current usage
-  const { data: row } = await supabase
-    .from('ai_usage')
-    .select('count')
-    .eq('user_id', userId)
-    .eq('type', type)
-    .eq('period', period)
-    .single();
 
   const used = row?.count ?? 0;
 
@@ -68,7 +68,7 @@ export async function checkAndIncrementQuota(
     return { allowed: false, used, limit };
   }
 
-  // 3. Upsert — increment atomically
+  // 2. Upsert — increment atomically
   await supabase.from('ai_usage').upsert(
     { user_id: userId, type, period, count: used + 1 },
     { onConflict: 'user_id,type,period' },

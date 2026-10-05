@@ -59,6 +59,8 @@ export async function updateSession(request: NextRequest) {
     '/sitemap.xml',
     '/manifest.webmanifest',
     '/opengraph-image',
+    '/icon',
+    '/apple-icon',
     '/twitter-image',
   ];
 

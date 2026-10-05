@@ -36,6 +36,8 @@ const publicPaths = [
   '/sitemap.xml',
   '/manifest.webmanifest',
   '/opengraph-image',
+  '/icon',
+  '/apple-icon',
   '/api/auth/login',
   '/api/billing/webhook',
   '/auth/callback',

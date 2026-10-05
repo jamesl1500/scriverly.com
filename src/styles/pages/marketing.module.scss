@@ -264,6 +264,45 @@
   line-height: v.$line-height-relaxed;
 }
 
+// ===== FAQ =====
+
+.faq {
+  padding: v.$space-20 0;
+  border-top: 1px solid v.$color-border;
+  background-color: v.$color-bg-card;
+}
+
+.faqList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-8;
+  margin-top: v.$space-10;
+
+  @include m.md {
+    grid-template-columns: repeat(2, 1fr);
+    gap: v.$space-10 v.$space-8;
+  }
+}
+
+.faqItem {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+.faqQuestion {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+}
+
+.faqAnswer {
+  margin: 0;
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+}
+
 // ===== CTA band =====
 
 .ctaBand {

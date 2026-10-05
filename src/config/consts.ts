@@ -23,3 +23,6 @@ export const SNAPSHOT_EVERY_N_SAVES = 10
 // ── AI quota limits (free tier) ───────────────────────────────────────────────
 export const FREE_ANALYSIS_LIMIT = 5   // analyses per calendar month
 export const FREE_OUTLINE_LIMIT  = 3   // outline generations per calendar month
+
+// ── AI input limits ───────────────────────────────────────────────────────────
+export const MAX_ANALYSIS_CHARS = 40_000  // ≈ 7 000 words sent to the model per analysis

@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/libs/seo';
 import page from '@/styles/pages/marketing.module.scss';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Privacy Policy',
   description: 'Read the Scriverly Privacy Policy to understand how we collect, use, and protect your data.',
-};
+  path: '/privacy',
+});
 
 export default function PrivacyPage() {
   return (

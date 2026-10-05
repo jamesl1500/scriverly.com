@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { streamObject } from 'ai';
+import { streamText, Output } from 'ai';
 import crypto from 'crypto';
 import { createSupabaseServerClient, createSupabaseServiceClient } from '@/libs/supabase/server';
 import { successResponse, errorResponse } from '@/libs/apiHelpers';
 import { checkAndIncrementQuota } from '@/libs/aiQuota';
 import { extractText } from '@/libs/ai/extractText';
-import { essayModel } from '@/libs/ai/client';
+import { essayModel, essayProviderOptions } from '@/libs/ai/client';
 import { essayAnalysisSchema } from '@/libs/ai/schemas';
+import { MAX_ANALYSIS_CHARS } from '@/config/consts';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -55,21 +56,6 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return errorResponse('Unauthorized', 401, 'unauthorized');
     }
 
-    // ── Quota check ──────────────────────────────────────────────────────────
-    const quota = await checkAndIncrementQuota(supabase, user.id, 'analysis');
-    if (!quota.allowed) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `You've used all ${quota.limit} AI analyses for this month. Upgrade to Premium for unlimited access.`,
-          code:  'quota_exceeded',
-          used:  quota.used,
-          limit: quota.limit,
-        },
-        { status: 402 },
-      );
-    }
-
     // Fetch the essay
     const { data: essay, error: essayError } = await supabase
       .from('essays')
@@ -99,8 +85,13 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     const body = await request.json().catch(() => ({}));
     const force = (body as { force?: boolean }).force ?? false;
 
-    // Content hash — avoids redundant API calls for unchanged text
-    const hash = crypto.createHash('sha256').update(rawText).digest('hex');
+    // Cap very long essays so input cost stays bounded
+    const analyzedText =
+      rawText.length > MAX_ANALYSIS_CHARS ? rawText.slice(0, MAX_ANALYSIS_CHARS) + '…' : rawText;
+
+    // Content hash of exactly what the model sees — avoids redundant API calls
+    // for unchanged text
+    const hash = crypto.createHash('sha256').update(analyzedText).digest('hex');
 
     if (!force) {
       const { data: cached } = await supabase
@@ -116,9 +107,22 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       }
     }
 
-    // Truncate to ~5 000 chars for cost efficiency (~1 250 tokens)
-    const truncated =
-      rawText.length > 5000 ? rawText.slice(0, 5000) + '…' : rawText;
+    // ── Quota check ──────────────────────────────────────────────────────────
+    // Charged only once a model call is actually needed — cache hits and the
+    // rejections above don't count against the free tier.
+    const quota = await checkAndIncrementQuota(supabase, user.id, 'analysis');
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `You've used all ${quota.limit} AI analyses for this month. Upgrade to Premium for unlimited access.`,
+          code:  'quota_exceeded',
+          used:  quota.used,
+          limit: quota.limit,
+        },
+        { status: 402 },
+      );
+    }
 
     const essayTypeLabel = essay.essay_type
       ? essay.essay_type.charAt(0).toUpperCase() + essay.essay_type.slice(1)
@@ -128,12 +132,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       ? ` Where you flag issues involving citations or references, judge them against ${essay.citation_style} conventions.`
       : '';
 
-    // ── Stream a schema-validated analysis from Claude Haiku ──────────────────
-    const result = streamObject({
+    // ── Stream a schema-constrained analysis from Claude ──────────────────────
+    const result = streamText({
       model:      essayModel,
-      schema:     essayAnalysisSchema,
-      maxOutputTokens: 2048,
-      temperature: 0.2,
+      output:     Output.object({ schema: essayAnalysisSchema }),
+      maxOutputTokens: 4096,
+      providerOptions: essayProviderOptions,
+      // Stop generating (and billing) if the client goes away or supersedes
+      // this request with a newer one.
+      abortSignal: request.signal,
       system:
         'You are a precise writing coach. Analyze essays and return structured JSON only.',
       prompt: `Analyze this ${essayTypeLabel} essay written at the ${levelLabel} level.${citationNote}
@@ -141,16 +148,22 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 Guidelines:
 - overall_feedback: 2-3 sentences of honest, constructive feedback
 - style_recommendations: the 3-6 most impactful issues, not an exhaustive list
-- spelling_grammar: only genuine errors, not style preferences
+- spelling_grammar: only genuine errors, not style preferences — at most the 10 most important
 - For style_recommendations, "original" must be copied VERBATIM from the essay text — do not paraphrase. "example" is your improved rewrite of that exact sentence.
 
 Subject: ${essay.subject ?? 'Not specified'}
 ---
-${truncated}
+${analyzedText}
 ---`,
-      onFinish: async ({ object, error }) => {
-        if (!object || error) {
-          console.error('[analyze] Model returned an invalid analysis:', error);
+      onError: ({ error }) => {
+        console.error('[analyze] Stream error:', error);
+      },
+      onFinish: async ({ text, finishReason }) => {
+        let object;
+        try {
+          object = essayAnalysisSchema.parse(JSON.parse(text));
+        } catch (parseErr) {
+          console.error(`[analyze] Model returned an invalid analysis (finishReason: ${finishReason}):`, parseErr);
           return;
         }
 

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { createSupabaseServerClient } from '@/libs/supabase/server';
 import { successResponse, errorResponse } from '@/libs/apiHelpers';
 import { checkAndIncrementQuota } from '@/libs/aiQuota';
-import { essayModel } from '@/libs/ai/client';
-import { essayOutlineSchema } from '@/libs/ai/schemas';
+import { essayModel, essayProviderOptions } from '@/libs/ai/client';
+import { essayOutlineSchema, type EssayOutline } from '@/libs/ai/schemas';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -66,6 +66,15 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) return errorResponse('Unauthorized', 401, 'unauthorized');
 
+    const { data: essay, error: essayError } = await supabase
+      .from('essays')
+      .select('id, title, subject, summary, essay_type, academic_level, citation_style')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (essayError || !essay) return errorResponse('Essay not found', 404, 'not_found');
+
     // ── Quota check ──────────────────────────────────────────────────────────
     const quota = await checkAndIncrementQuota(supabase, user.id, 'outline');
     if (!quota.allowed) {
@@ -81,28 +90,19 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
       );
     }
 
-    const { data: essay, error: essayError } = await supabase
-      .from('essays')
-      .select('id, title, subject, summary, essay_type, academic_level, citation_style')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (essayError || !essay) return errorResponse('Essay not found', 404, 'not_found');
-
     const essayType     = essay.essay_type    ?? 'argumentative';
     const academicLevel = (essay.academic_level ?? 'undergraduate').replace('_', ' ');
     const citationNote  = essay.citation_style
       ? ` Where the outline calls for evidence or sourcing, note that citations should follow ${essay.citation_style} conventions.`
       : '';
 
-    let outline: { introduction: { heading: string; talking_point: string }[]; body: { heading: string; talking_point: string }[]; conclusion: { heading: string; talking_point: string }[] };
+    let outline: EssayOutline;
     try {
-      const result = await generateObject({
+      const result = await generateText({
         model:      essayModel,
-        schema:     essayOutlineSchema,
+        output:     Output.object({ schema: essayOutlineSchema }),
         maxOutputTokens: 2048,
-        temperature: 0.3,
+        providerOptions: essayProviderOptions,
         system:
           'You are an expert academic writing coach. Generate structured essay outlines and return JSON only.',
         prompt: `Create a detailed outline for a ${essayType} essay at the ${academicLevel} level.${citationNote}
@@ -117,7 +117,7 @@ Guidelines:
 - Make headings specific to the actual topic, not generic
 - Keep each talking_point to 1-2 concise sentences describing what to write there — don't draft the actual content`,
       });
-      outline = result.object;
+      outline = result.output;
     } catch (genErr) {
       console.error('[outline] Generation failed:', genErr);
       return errorResponse('AI returned an invalid outline format.', 500, 'parse_error');

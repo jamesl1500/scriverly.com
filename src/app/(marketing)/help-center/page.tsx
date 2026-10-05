@@ -1,11 +1,19 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/libs/seo';
 import Link from 'next/link';
 import page from '@/styles/pages/marketing.module.scss';
 
 export const metadata: Metadata = {
-  title: 'Help Center',
-  description:
-    'Find answers to common questions about using Scriverly, managing your account, and getting the most out of your subscription.',
+  ...pageMetadata({
+    title: 'Help Center',
+    description:
+      'Find answers to common questions about using Scriverly, managing your account, and getting the most out of your subscription.',
+    path: '/help-center',
+  }),
+  // Every article is still a "Coming soon" placeholder — keep the page out of
+  // search results until there is real content, then remove this and add the
+  // route back to sitemap.ts.
+  robots: { index: false, follow: true },
 };
 
 const categories = [

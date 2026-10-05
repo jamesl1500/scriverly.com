@@ -1,11 +1,18 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Sparkles, BookOpen, FileText, BarChart2, ArrowRight } from 'lucide-react';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import styles from '@/styles/layouts/marketing-layout.module.scss';
 import page from '@/styles/pages/marketing.module.scss';
+import { FREE_ANALYSIS_LIMIT, FREE_OUTLINE_LIMIT } from '@/config/consts';
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/config/site';
+import { jsonLd, pageMetadata } from '@/libs/seo';
 
-// Title and description are inherited from the root layout's default metadata.
+// Title and description fall back to the root layout's defaults.
+export const metadata: Metadata = pageMetadata({ path: '/' });
+
+const PREMIUM_PRICE_USD = 9;
 
 const features = [
   {
@@ -47,6 +54,53 @@ const steps = [
     desc: 'Apply grammar fixes and style recommendations with one click. Track your progress toward your word goal.',
   },
 ];
+
+const faqs = [
+  {
+    q: 'Is Scriverly free to use?',
+    a: `Yes. The free plan includes ${FREE_ANALYSIS_LIMIT} AI essay analyses and ${FREE_OUTLINE_LIMIT} outline generations every month, with no credit card required. Premium is $${PREMIUM_PRICE_USD} per month and removes those limits.`,
+  },
+  {
+    q: 'What does the AI essay analysis check?',
+    a: 'Each analysis gives your essay an overall score out of 100 and a breakdown across five dimensions: clarity, structure, style alignment, grammar, and vocabulary. You also get specific style recommendations and spelling and grammar fixes you can apply in one click.',
+  },
+  {
+    q: 'Does Scriverly write my essay for me?',
+    a: 'No. Scriverly is a writing assistant, not a ghostwriter. Outlines suggest headings and talking points, and the analysis explains how to improve what you have written — the words stay yours.',
+  },
+  {
+    q: 'Which essay types and academic levels are supported?',
+    a: 'Argumentative, analytical, expository, persuasive, narrative, descriptive, and comparative essays, from high school through undergraduate, graduate, and doctoral level. Feedback can follow APA, MLA, or Chicago citation conventions.',
+  },
+  {
+    q: 'Is my writing used to train AI models?',
+    a: 'No. Your essays are sent to our AI provider only to generate your feedback, and we do not use your content to train AI models. You keep full ownership of everything you write.',
+  },
+];
+
+const softwareJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: SITE_NAME,
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+  applicationCategory: 'EducationalApplication',
+  operatingSystem: 'Web',
+  offers: [
+    { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD' },
+    { '@type': 'Offer', name: 'Premium', price: String(PREMIUM_PRICE_USD), priceCurrency: 'USD' },
+  ],
+};
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+};
 
 export default function HomePage() {
   return (
@@ -119,6 +173,22 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── FAQ ──────────────────────────────────── */}
+        <section className={page.faq}>
+          <div className={page.container}>
+            <p className={page.sectionLabel}>FAQ</p>
+            <h2 className={page.sectionTitle}>Common questions</h2>
+            <dl className={page.faqList}>
+              {faqs.map(({ q, a }) => (
+                <div key={q} className={page.faqItem}>
+                  <dt className={page.faqQuestion}>{q}</dt>
+                  <dd className={page.faqAnswer}>{a}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
         {/* ── CTA band ─────────────────────────────── */}
         <section className={page.ctaBand}>
           <div className={page.container}>
@@ -136,6 +206,15 @@ export default function HomePage() {
       </main>
 
       <MarketingFooter />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(softwareJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(faqJsonLd) }}
+      />
     </div>
   );
 }
