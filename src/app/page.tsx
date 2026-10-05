@@ -5,34 +5,36 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import styles from '@/styles/layouts/marketing-layout.module.scss';
 import page from '@/styles/pages/marketing.module.scss';
-import { FREE_ANALYSIS_LIMIT, FREE_OUTLINE_LIMIT } from '@/config/consts';
+import { FREE_ANALYSIS_LIMIT, FREE_OUTLINE_LIMIT, PREMIUM_PRICE_USD } from '@/config/consts';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/config/site';
 import { jsonLd, pageMetadata } from '@/libs/seo';
 
 // Title and description fall back to the root layout's defaults.
 export const metadata: Metadata = pageMetadata({ path: '/' });
 
-const PREMIUM_PRICE_USD = 9;
-
 const features = [
   {
     icon: <Sparkles size={18} />,
     title: 'AI Essay Analysis',
+    href: '/features/essay-feedback',
     desc: 'Get a scored breakdown of clarity, structure, grammar, and vocabulary the moment you finish writing.',
   },
   {
     icon: <BookOpen size={18} />,
     title: 'Smart Outlines',
+    href: '/features/essay-outline-generator',
     desc: 'Generate structured outlines tailored to your essay type and academic level before you write a single word.',
   },
   {
     icon: <FileText size={18} />,
     title: 'Grammar & Style',
+    href: '/features/grammar-and-style-checker',
     desc: 'Receive inline suggestions for grammar issues and style improvements you can apply with one click.',
   },
   {
     icon: <BarChart2 size={18} />,
     title: 'Essay Dashboard',
+    href: '/features',
     desc: 'Track word goals, due dates, and progress across all your essays in one organized view.',
   },
 ];
@@ -145,7 +147,9 @@ export default function HomePage() {
               {features.map(f => (
                 <div key={f.title} className={page.featureCard}>
                   <div className={page.featureIcon} aria-hidden="true">{f.icon}</div>
-                  <h3 className={page.featureTitle}>{f.title}</h3>
+                  <h3 className={page.featureTitle}>
+                    <Link href={f.href} className={page.featureLink}>{f.title}</Link>
+                  </h3>
                   <p className={page.featureDesc}>{f.desc}</p>
                 </div>
               ))}

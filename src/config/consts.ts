@@ -24,5 +24,9 @@ export const SNAPSHOT_EVERY_N_SAVES = 10
 export const FREE_ANALYSIS_LIMIT = 5   // analyses per calendar month
 export const FREE_OUTLINE_LIMIT  = 3   // outline generations per calendar month
 
+// ── Pricing ───────────────────────────────────────────────────────────────────
+// Display only — the amount actually charged is set by STRIPE_PREMIUM_PRICE_ID.
+export const PREMIUM_PRICE_USD = 9   // per month
+
 // ── AI input limits ───────────────────────────────────────────────────────────
 export const MAX_ANALYSIS_CHARS = 40_000  // ≈ 7 000 words sent to the model per analysis

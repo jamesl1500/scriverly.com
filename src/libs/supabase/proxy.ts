@@ -36,42 +36,28 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  // Redirect unauthenticated users to /login for protected routes.
-  const publicPaths = [
-    '/',
-    '/about',
-    '/changelog',
-    '/contact',
-    '/cookies',
-    '/feedback',
-    '/help-center',
-    '/privacy',
-    '/status',
-    '/terms',
-    '/login',
-    '/signup',
-    '/forgot_password',
-    '/reset_password',
-    '/verify-email',
-    '/api/auth',
-    '/api/billing/webhook',
-    '/robots.txt',
-    '/sitemap.xml',
-    '/manifest.webmanifest',
-    '/opengraph-image',
-    '/icon',
-    '/apple-icon',
-    '/twitter-image',
+  // Redirect unauthenticated users to /login for protected routes. Only the
+  // app itself is listed: any other path is public, so an unknown URL reaches
+  // the router and gets a real 404 instead of a redirect to the login page.
+  // The API stays closed by default.
+  const protectedPaths = [
+    '/dashboard',
+    '/essays',
+    '/profile',
+    '/settings',
+    '/onboarding',
+    '/api',
   ];
+  const publicApiPaths = ['/api/auth', '/api/billing/webhook'];
 
-  const isPublic =
-    publicPaths.some((p) =>
-      p === '/'
-        ? request.nextUrl.pathname === '/'
-        : request.nextUrl.pathname.startsWith(p),
-    ) || request.nextUrl.pathname.startsWith('/auth/');
+  const { pathname } = request.nextUrl;
+  const matches = (prefix: string) =>
+    pathname === prefix || pathname.startsWith(`${prefix}/`);
 
-  if (!user && !isPublic) {
+  const isProtected =
+    protectedPaths.some(matches) && !publicApiPaths.some(matches);
+
+  if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

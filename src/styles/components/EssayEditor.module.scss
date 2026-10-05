@@ -329,6 +329,23 @@
     }
   }
 
+  // ── Lined page template (optional, see usePaperStyle) ──
+  // Each text block draws its own rule one line-height apart, so the lines sit
+  // under every line of text whatever the block's font size.
+  &[data-paper='lined'] :global(.ProseMirror) {
+    p,
+    h1,
+    h2,
+    h3 {
+      background-image: linear-gradient(
+        to bottom,
+        transparent calc(1lh - 1px),
+        v.$color-border-strong calc(1lh - 1px)
+      );
+      background-size: 100% 1lh;
+    }
+  }
+
   // ── TipTap / ProseMirror prose styles ──
   :global(.ProseMirror) {
     outline: none;

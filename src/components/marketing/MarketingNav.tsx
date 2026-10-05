@@ -15,6 +15,8 @@ export default function MarketingNav() {
         <Logo size="sm" href="/" />
 
         <div className={styles.navLinks}>
+          <Link href="/features" className={styles.navLink}>Features</Link>
+          <Link href="/guides" className={styles.navLink}>Guides</Link>
           <Link href="/about" className={styles.navLink}>About</Link>
           <Link href="/contact" className={styles.navLink}>Contact</Link>
         </div>
@@ -36,6 +38,8 @@ export default function MarketingNav() {
 
       {mobileOpen && (
         <div className={styles.mobileMenu}>
+          <Link href="/features" className={styles.mobileLink} onClick={() => setMobileOpen(false)}>Features</Link>
+          <Link href="/guides" className={styles.mobileLink} onClick={() => setMobileOpen(false)}>Guides</Link>
           <Link href="/about" className={styles.mobileLink} onClick={() => setMobileOpen(false)}>About</Link>
           <Link href="/contact" className={styles.mobileLink} onClick={() => setMobileOpen(false)}>Contact</Link>
           <div className={styles.mobileDivider} />

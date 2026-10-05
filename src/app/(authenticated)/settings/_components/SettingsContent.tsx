@@ -19,6 +19,7 @@ import {
   Zap,
 } from 'lucide-react';
 import type { AxiosError } from 'axios';
+import { PREMIUM_PRICE_USD } from '@/config/consts';
 
 import {
   settingsSchema,
@@ -750,7 +751,7 @@ function BillingTab({ billingStatus }: { billingStatus?: 'success' | 'cancelled'
                 <form method="POST" action="/api/billing/checkout">
                   <button type="submit" className={styles.billingUpgradeBtn}>
                     <Sparkles size={14} aria-hidden="true" />
-                    Upgrade to Premium — $9/mo
+                    Upgrade to Premium — ${PREMIUM_PRICE_USD}/mo
                   </button>
                 </form>
               )}
