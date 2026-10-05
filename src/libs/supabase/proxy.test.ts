@@ -41,6 +41,11 @@ const publicPaths = [
   '/api/auth/login',
   '/api/billing/webhook',
   '/auth/callback',
+  '/features/essay-feedback',
+  '/guides',
+  // Unknown and look-alike paths fall through to the router's 404 page
+  '/does-not-exist',
+  '/essays-guide',
 ];
 
 /** Routes that require an authenticated session. */
@@ -48,9 +53,13 @@ const protectedPaths = [
   '/dashboard',
   '/essays',
   '/essays/new',
+  '/essays/abc-123',
   '/profile',
   '/settings',
   '/onboarding',
+  '/api/essays',
+  '/api/user/profile',
+  '/api/billing/checkout',
 ];
 
 describe('updateSession', () => {

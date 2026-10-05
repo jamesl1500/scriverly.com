@@ -208,6 +208,15 @@
   margin-bottom: v.$space-2;
 }
 
+.featureLink {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    color: v.$color-accent;
+  }
+}
+
 .featureDesc {
   font-size: v.$font-size-sm;
   color: v.$color-text-secondary;
@@ -330,6 +339,197 @@
   line-height: v.$line-height-relaxed;
   max-width: 28rem;
   margin: 0 auto v.$space-10;
+}
+
+// ===== Content pages (features, guides) =====
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: v.$space-2;
+  margin-bottom: v.$space-8;
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+
+  a {
+    color: v.$color-text-secondary;
+    text-decoration: none;
+
+    &:hover {
+      color: v.$color-accent;
+      text-decoration: underline;
+    }
+  }
+}
+
+.contentCards {
+  margin-top: v.$space-16;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.contentCardsHeading {
+  font-size: v.$font-size-xl;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tight;
+  margin-bottom: v.$space-6;
+}
+
+.contentCardGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-6;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  @include m.md {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include m.lg {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.contentCard {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+  height: 100%;
+  padding: v.$space-6;
+  background-color: v.$color-bg-card;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+  text-decoration: none;
+  transition: box-shadow v.$transition-base, border-color v.$transition-base;
+
+  &:hover {
+    box-shadow: v.$shadow-md;
+    border-color: v.$color-border-strong;
+  }
+}
+
+.contentCardTitle {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+}
+
+.contentCardDesc {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+}
+
+.contentCta {
+  margin-top: v.$space-16;
+  padding: v.$space-10 v.$space-8;
+  background-color: v.$color-accent-lighter;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+}
+
+.contentCtaTitle {
+  font-size: v.$font-size-xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tight;
+  margin-bottom: v.$space-3;
+}
+
+.contentCtaText {
+  font-size: v.$font-size-base;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+  max-width: 36rem;
+  margin-bottom: v.$space-6;
+}
+
+// The global reset strips list markers; guides rely on numbered steps.
+.contentBody {
+  ul { list-style: disc; }
+  ol { list-style: decimal; }
+}
+
+// ===== 404 =====
+
+.notFound {
+  padding: v.$space-20 0 v.$space-24;
+}
+
+.notFoundCode {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  letter-spacing: v.$tracking-wider;
+  color: v.$color-accent;
+  margin-bottom: v.$space-4;
+}
+
+.notFoundTitle {
+  font-size: v.$font-size-3xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  letter-spacing: v.$tracking-tighter;
+  margin-bottom: v.$space-4;
+}
+
+.notFoundText {
+  font-size: v.$font-size-lg;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-relaxed;
+  max-width: 32rem;
+  margin-bottom: v.$space-8;
+}
+
+.notFoundActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: v.$space-3;
+}
+
+.notFoundLinks {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: v.$space-4;
+  list-style: none;
+  padding: 0;
+  margin: v.$space-16 0 0;
+  max-width: 48rem;
+
+  @include m.md {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.notFoundLink {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+  padding: v.$space-5;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+  background-color: v.$color-bg-card;
+  text-decoration: none;
+
+  &:hover {
+    border-color: v.$color-border-strong;
+  }
+}
+
+.notFoundLinkLabel {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+}
+
+.notFoundLinkDesc {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
 }
 
 // ===== Prose pages (about, terms, privacy) =====

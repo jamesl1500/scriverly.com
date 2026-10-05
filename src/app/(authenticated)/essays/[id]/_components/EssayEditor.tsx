@@ -27,12 +27,14 @@ import {
   Sparkles,
   Settings,
   BookOpen,
+  Rows3,
 } from 'lucide-react';
 import type { AxiosError } from 'axios';
 
 import type { Essay } from '@/libs/validations/essay';
 import { ESSAY_TYPE_LABELS } from '@/libs/validations/essay';
 import apiClient from '@/libs/apiClient';
+import { usePaperStyle } from '@/libs/hooks/usePaperStyle';
 import EssayAISidebar from './EssayAISidebar';
 import EssayOutlinePanel from './EssayOutlinePanel';
 import EssaySettingsModal from './EssaySettingsModal';
@@ -159,6 +161,7 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
   const [outlineOpen,  setOutlineOpen]  = useState(essay.start_with_outline === true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [localEssay, setLocalEssay] = useState<Essay>(essay);
+  const [paperStyle, setPaperStyle] = usePaperStyle();
   // Incremented whenever the debounce fires to signal the sidebar to re-analyze
   const [autoAnalyzeTrigger, setAutoAnalyzeTrigger] = useState(0);
 
@@ -488,6 +491,17 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
           <div style={{ marginLeft: 'auto', display: 'flex', gap: '4px', alignItems: 'center' }}>
             <button
               type="button"
+              className={`${styles.toolbarBtn} ${paperStyle === 'lined' ? styles.toolbarBtnActive : ''} ${styles.aiBtnLabel}`}
+              onClick={() => setPaperStyle(paperStyle === 'lined' ? 'blank' : 'lined')}
+              aria-label="Show ruled lines under your text"
+              aria-pressed={paperStyle === 'lined'}
+              title={paperStyle === 'lined' ? 'Switch to a blank page' : 'Switch to a lined page'}
+            >
+              <Rows3 size={14} aria-hidden="true" />
+              <span>Lines</span>
+            </button>
+            <button
+              type="button"
               className={`${styles.toolbarBtn} ${outlineOpen ? styles.toolbarBtnActive : ''} ${styles.aiBtnLabel}`}
               onClick={() => setOutlineOpen(o => !o)}
               aria-label="Toggle Outline panel"
@@ -533,7 +547,7 @@ export default function EssayEditor({ essay }: EssayEditorProps) {
         )}
 
         <div className={styles.editorBody}>
-          <div className={styles.editorContent}>
+          <div className={styles.editorContent} data-paper={paperStyle}>
             <EditorContent editor={editor} />
           </div>
         </div>

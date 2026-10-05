@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { X, Sparkles, CheckCircle2, Zap } from 'lucide-react';
+import { PREMIUM_PRICE_USD } from '@/config/consts';
 import styles from '@/styles/components/UpgradeModal.module.scss';
 
 interface UpgradeModalProps {
@@ -108,7 +109,7 @@ export default function UpgradeModal({ feature, used, limit, onClose }: UpgradeM
               disabled={loading}
             >
               <Sparkles size={14} aria-hidden="true" />
-              {loading ? 'Redirecting to checkout…' : 'Upgrade to Premium — $9/mo'}
+              {loading ? 'Redirecting to checkout…' : `Upgrade to Premium — $${PREMIUM_PRICE_USD}/mo`}
             </button>
             <button
               type="button"

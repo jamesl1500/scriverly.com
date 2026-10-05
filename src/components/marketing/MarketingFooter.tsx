@@ -19,6 +19,10 @@ export default function MarketingFooter() {
           <div className={styles.footerCol}>
             <span className={styles.footerColLabel}>Product</span>
             <div className={styles.footerColLinks}>
+              <Link href="/features/essay-feedback" className={styles.footerLink}>Essay feedback</Link>
+              <Link href="/features/essay-outline-generator" className={styles.footerLink}>Outline generator</Link>
+              <Link href="/features/grammar-and-style-checker" className={styles.footerLink}>Grammar and style</Link>
+              <Link href="/guides" className={styles.footerLink}>Writing guides</Link>
               <Link href="/signup" className={styles.footerLink}>Get started</Link>
               <Link href="/login" className={styles.footerLink}>Log in</Link>
             </div>
