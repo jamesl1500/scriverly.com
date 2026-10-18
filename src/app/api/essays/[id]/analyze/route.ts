@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { streamText, Output } from 'ai';
-import crypto from 'crypto';
+import { streamText, Output, toTextStream, createTextStreamResponse } from 'ai';
+import crypto from 'node:crypto';
 import { createSupabaseServerClient, createSupabaseServiceClient } from '@/libs/supabase/server';
 import { successResponse, errorResponse } from '@/libs/apiHelpers';
 import { checkAndIncrementQuota } from '@/libs/aiQuota';
@@ -136,7 +136,8 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     const result = streamText({
       model:      essayModel,
       output:     Output.object({ schema: essayAnalysisSchema }),
-      maxOutputTokens: 4096,
+      // Includes headroom for adaptive thinking, which shares this cap
+      maxOutputTokens: 8192,
       providerOptions: essayProviderOptions,
       // Stop generating (and billing) if the client goes away or supersedes
       // this request with a newer one.
@@ -159,6 +160,11 @@ ${analyzedText}
         console.error('[analyze] Stream error:', error);
       },
       onFinish: async ({ text, finishReason }) => {
+        if (finishReason === 'content-filter') {
+          console.warn('[analyze] Model declined to analyze this essay (refusal).');
+          return;
+        }
+
         let object;
         try {
           object = essayAnalysisSchema.parse(JSON.parse(text));
@@ -191,7 +197,7 @@ ${analyzedText}
       },
     });
 
-    return result.toTextStreamResponse();
+    return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) });
   } catch (err) {
     console.error('[analyze] Error:', err);
     return errorResponse('AI analysis failed. Please try again.', 500);

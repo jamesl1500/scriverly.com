@@ -1,8 +1,8 @@
 describe('Settings page', () => {
   before(function () {
-    const email = Cypress.env('TEST_USER_EMAIL');
-    const password = Cypress.env('TEST_USER_PASSWORD');
-    if (!email || !password) this.skip();
+    cy.testUser().then(({ email, password }) => {
+      if (!email || !password) this.skip();
+    });
   });
 
   beforeEach(() => {
@@ -62,12 +62,13 @@ describe('Settings page', () => {
 
   it('shows the user email address in the Account tab', () => {
     cy.contains('button', 'Account').click();
-    const email = Cypress.env('TEST_USER_EMAIL') as string;
-    if (email) {
-      cy.contains(email).should('be.visible');
-    } else {
-      cy.contains(/@/).should('exist');
-    }
+    cy.testUser().then(({ email }) => {
+      if (email) {
+        cy.contains(email).should('be.visible');
+      } else {
+        cy.contains(/@/).should('exist');
+      }
+    });
   });
 
   it('shows change email and change password sections in the Account tab', () => {

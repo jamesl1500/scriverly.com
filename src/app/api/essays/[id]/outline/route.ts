@@ -101,7 +101,8 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
       const result = await generateText({
         model:      essayModel,
         output:     Output.object({ schema: essayOutlineSchema }),
-        maxOutputTokens: 2048,
+        // Includes headroom for adaptive thinking, which shares this cap
+        maxOutputTokens: 4096,
         providerOptions: essayProviderOptions,
         system:
           'You are an expert academic writing coach. Generate structured essay outlines and return JSON only.',
@@ -117,6 +118,14 @@ Guidelines:
 - Make headings specific to the actual topic, not generic
 - Keep each talking_point to 1-2 concise sentences describing what to write there — don't draft the actual content`,
       });
+      // Haiku 5.5 safety classifiers can decline; there's no server-side fallback
+      if (result.finishReason === 'content-filter') {
+        return errorResponse(
+          "The AI couldn't generate an outline for this topic. Try rewording the title or summary.",
+          422,
+          'refused',
+        );
+      }
       outline = result.output;
     } catch (genErr) {
       console.error('[outline] Generation failed:', genErr);

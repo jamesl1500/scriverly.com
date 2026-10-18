@@ -112,17 +112,16 @@ describe('Login page', () => {
   // ── Full login flow (requires TEST_USER_EMAIL / TEST_USER_PASSWORD) ─────────
 
   it('redirects to /dashboard on successful login', function () {
-    const email = Cypress.env('TEST_USER_EMAIL');
-    const password = Cypress.env('TEST_USER_PASSWORD');
+    cy.testUser().then(({ email, password }) => {
+      if (!email || !password) {
+        this.skip();
+      }
 
-    if (!email || !password) {
-      this.skip();
-    }
-
-    cy.get('#email').type(email as string);
-    cy.get('#password').type(password as string);
-    cy.contains('button[type="submit"]', 'Sign in').click();
-    cy.url().should('include', '/dashboard');
+      cy.get('#email').type(email);
+      cy.get('#password').type(password, { log: false });
+      cy.contains('button[type="submit"]', 'Sign in').click();
+      cy.url().should('include', '/dashboard');
+    });
   });
 
   it('navigates to /forgot_password when "Forgot password?" is clicked', () => {

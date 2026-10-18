@@ -1,8 +1,8 @@
 describe('Dashboard page', () => {
   before(function () {
-    const email = Cypress.env('TEST_USER_EMAIL');
-    const password = Cypress.env('TEST_USER_PASSWORD');
-    if (!email || !password) this.skip();
+    cy.testUser().then(({ email, password }) => {
+      if (!email || !password) this.skip();
+    });
   });
 
   beforeEach(() => {

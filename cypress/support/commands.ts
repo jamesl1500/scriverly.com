@@ -5,8 +5,15 @@
 export {};
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- Cypress types are augmented via this global namespace
   namespace Cypress {
     interface Chainable {
+      /**
+       * Yields the test user's credentials from TEST_USER_EMAIL and
+       * TEST_USER_PASSWORD (empty strings when unset).
+       */
+      testUser(): Chainable<{ email: string; password: string }>;
+
       /**
        * Programmatically logs in by calling the login API route directly.
        * Uses cy.session() to cache and restore auth cookies across tests in
@@ -25,12 +32,23 @@ declare global {
   }
 }
 
-Cypress.Commands.add(
-  'login',
-  (
-    email: string = Cypress.env('TEST_USER_EMAIL'),
-    password: string = Cypress.env('TEST_USER_PASSWORD'),
-  ) => {
+Cypress.Commands.add('testUser', () =>
+  cy
+    .env<{ TEST_USER_EMAIL?: string; TEST_USER_PASSWORD?: string }>(
+      ['TEST_USER_EMAIL', 'TEST_USER_PASSWORD'],
+      { log: false },
+    )
+    .then(({ TEST_USER_EMAIL, TEST_USER_PASSWORD }) => ({
+      email:    TEST_USER_EMAIL ?? '',
+      password: TEST_USER_PASSWORD ?? '',
+    })),
+);
+
+Cypress.Commands.add('login', (emailArg?: string, passwordArg?: string) => {
+  cy.testUser().then((user) => {
+    const email = emailArg ?? user.email;
+    const password = passwordArg ?? user.password;
+
     cy.session(
       ['auth-session', email],
       () => {
@@ -54,8 +72,8 @@ Cypress.Commands.add(
         cacheAcrossSpecs: true,
       },
     );
-  },
-);
+  });
+});
 
 Cypress.Commands.add('logout', () => {
   cy.request({
